@@ -289,6 +289,7 @@ async function nextDeal(forcedId?: string): Promise<void> {
   } catch (err) {
     statusEl.textContent = "Deal failed";
     scrambleEl.textContent = err instanceof Error ? err.message : String(err);
+    btnReveal.hidden = true;
   } finally {
     btnNext.disabled = false;
   }

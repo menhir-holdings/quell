@@ -133,9 +133,61 @@ function dealTwoGen(settings: Settings): Deal {
   };
 }
 
+const FACES = ["U", "D", "F", "B", "R", "L"] as const;
+const AXIS: Record<(typeof FACES)[number], number> = {
+  U: 0,
+  D: 0,
+  F: 1,
+  B: 1,
+  R: 2,
+  L: 2,
+};
+const SUFFIXES = ["", "'", "2"] as const;
+
+/** WCA-style random-move scramble (main thread; used if cubing.js workers fail). */
+function randomMoveScramble(length = 25): string {
+  const moves: string[] = [];
+  let lastFace: (typeof FACES)[number] | "" = "";
+  let lastAxis = -1;
+  let axisStreak = 0;
+  for (let i = 0; i < length; i++) {
+    let face: (typeof FACES)[number];
+    do {
+      face = FACES[Math.floor(Math.random() * FACES.length)];
+    } while (
+      face === lastFace ||
+      (AXIS[face] === lastAxis && axisStreak >= 1)
+    );
+    if (AXIS[face] === lastAxis) axisStreak += 1;
+    else axisStreak = 0;
+    lastFace = face;
+    lastAxis = AXIS[face];
+    moves.push(face + SUFFIXES[Math.floor(Math.random() * SUFFIXES.length)]);
+  }
+  return moves.join(" ");
+}
+
+let useSearchWorkers = true;
+
+async function wcaScramble(): Promise<string> {
+  if (!useSearchWorkers) return randomMoveScramble();
+  try {
+    const alg = await Promise.race([
+      randomScrambleForEvent("333"),
+      new Promise<never>((_, reject) => {
+        setTimeout(() => reject(new Error("scramble timeout")), 2000);
+      }),
+    ]);
+    return alg.toString();
+  } catch {
+    useSearchWorkers = false;
+    return randomMoveScramble();
+  }
+}
+
 async function dealFull(settings: Settings): Promise<Deal> {
   const hold = chooseHold(settings);
-  const scramble = (await randomScrambleForEvent("333")).toString();
+  const scramble = await wcaScramble();
   return {
     mode: "full",
     hold,
