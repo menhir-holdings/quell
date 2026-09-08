@@ -13,7 +13,9 @@ None on `main` yet.
 
 | Issue | What |
 |-------|------|
-| [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 trainer — OLL/PLL/2-gen/F2L/full |
+| [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 trainer — OLL/PLL/2-gen/F2L/full — [PR #1](https://github.com/menhir-holdings/quell/pull/1) **In Review** |
+
+Preview: https://quell-git-ledoit-mt-192-v1-trainer-ollpl-df2c0d-menhir-holdings.vercel.app
 
 ## Next
 
