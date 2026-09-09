@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Serif:ital,wght@0,600;1,400&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,14..144,600;1,14..144,400&family=Manrope:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
   </head>
@@ -32,7 +32,11 @@
       <p id="empty" class="empty" hidden></p>
 
       <section class="stage" id="stage">
-        <div id="player-host" class="player-host"></div>
+        <div class="cube-card">
+          <div id="ll-diagram" class="ll-diagram"></div>
+          <div id="player-host" class="player-host" hidden></div>
+          <nav id="view-tabs" class="view-tabs" aria-label="Cube view"></nav>
+        </div>
         <div class="meta">
           <p id="case-label" class="case-label"></p>
           <p id="case-sub" class="case-sub"></p>
@@ -48,18 +52,17 @@
           </label>
           <p class="scramble-kicker" id="setup-kicker">Setup</p>
           <pre id="setup" class="scramble"></pre>
+          <button type="button" id="solve-card" class="solve-card" aria-expanded="false">
+            <span class="solve-kicker">Solve</span>
+            <span id="solve-body" class="solve-body">Tap to reveal</span>
+          </button>
           <div class="actions">
             <button type="button" id="btn-next" class="pill primary" hidden>
               Next
             </button>
-            <button type="button" id="btn-reveal" class="pill">
-              Reveal solve
+            <button type="button" id="btn-learned" class="learned" aria-pressed="false">
+              Learned
             </button>
-            <button type="button" id="btn-practice" class="pill"></button>
-          </div>
-          <div id="solve-box" class="solve-box" hidden>
-            <p class="scramble-kicker">Solve</p>
-            <button type="button" id="solve-alg" class="alg"></button>
           </div>
         </div>
       </section>

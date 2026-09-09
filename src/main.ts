@@ -1,5 +1,6 @@
 import { TwistyPlayer } from "cubing/twisty";
 import { casesFor, dealCase, pickRandom } from "./deal";
+import { llMarkup } from "./ll";
 import { displayName, getProgress, setProgress } from "./progress";
 import type { CaseDef, CubeView, Deal, Phase, PracticeSub, SetId, Settings } from "./types";
 import "./style.css";
@@ -35,6 +36,7 @@ let revealed = false;
 const setsEl = document.querySelector("#sets") as HTMLElement;
 const phasesEl = document.querySelector("#phases") as HTMLElement;
 const filtersEl = document.querySelector("#filters") as HTMLElement;
+const viewTabsEl = document.querySelector("#view-tabs") as HTMLElement;
 const statusEl = document.querySelector("#status") as HTMLElement;
 const emptyEl = document.querySelector("#empty") as HTMLElement;
 const stageEl = document.querySelector("#stage") as HTMLElement;
@@ -43,15 +45,15 @@ const subEl = document.querySelector("#case-sub") as HTMLElement;
 const nameInput = document.querySelector("#custom-name") as HTMLInputElement;
 const setupKicker = document.querySelector("#setup-kicker") as HTMLElement;
 const setupEl = document.querySelector("#setup") as HTMLElement;
-const algsBox = document.querySelector("#solve-box") as HTMLElement;
-const solveBtn = document.querySelector("#solve-alg") as HTMLButtonElement;
+const solveCard = document.querySelector("#solve-card") as HTMLButtonElement;
+const solveBody = document.querySelector("#solve-body") as HTMLElement;
 const gridEl = document.querySelector("#grid") as HTMLElement;
 const gridWrap = document.querySelector("#grid-wrap") as HTMLElement;
 const gridTitle = document.querySelector("#grid-title") as HTMLElement;
 const gridLead = document.querySelector("#grid-lead") as HTMLElement;
 const btnNext = document.querySelector("#btn-next") as HTMLButtonElement;
-const btnReveal = document.querySelector("#btn-reveal") as HTMLButtonElement;
-const btnPractice = document.querySelector("#btn-practice") as HTMLButtonElement;
+const btnLearned = document.querySelector("#btn-learned") as HTMLButtonElement;
+const llDiagram = document.querySelector("#ll-diagram") as HTMLElement;
 const playerHost = document.querySelector("#player-host") as HTMLElement;
 
 let player: TwistyPlayer | null = null;
@@ -59,13 +61,16 @@ let player: TwistyPlayer | null = null;
 function createPlayer(): TwistyPlayer {
   const next = new TwistyPlayer({
     puzzle: "3x3x3",
-    visualization: settings.view === "2d" ? "experimental-2D-LL" : "3D",
-    background: settings.view === "2d" ? "checkered" : "none",
+    visualization: "3D",
+    background: "none",
     controlPanel: "none",
-    hintFacelets: settings.view === "3d" ? "floating" : "none",
+    hintFacelets: "floating",
     viewerLink: "none",
     cameraLatitude: 35,
     cameraLongitude: 25,
+    experimentalStickering: current?.stickering ?? "OLL",
+    experimentalSetupAlg: current ? `z2 ${current.setupAlg}` : "",
+    experimentalSetupAnchor: "start",
   });
   next.style.width = "100%";
   next.style.height = "100%";
@@ -89,6 +94,12 @@ function applyAlgToPlayer(d: Deal, play = false): void {
   if (play) p.play();
 }
 
+function showView(): void {
+  const top = settings.view === "2d";
+  llDiagram.hidden = !top;
+  playerHost.hidden = top;
+}
+
 function tab(
   parent: HTMLElement,
   items: { id: string; label: string }[],
@@ -97,18 +108,21 @@ function tab(
 ): void {
   parent.innerHTML = "";
   for (const item of items) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "mode-tab" + (item.id === active ? " active" : "");
-    btn.textContent = item.label;
-    btn.addEventListener("click", () => onPick(item.id));
-    parent.append(btn);
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "mode-tab" + (item.id === active ? " active" : "");
+    button.textContent = item.label;
+    button.addEventListener("click", () => onPick(item.id));
+    parent.append(button);
   }
 }
 
 function applyView(): void {
-  remountPlayer();
-  if (current) applyAlgToPlayer(current);
+  showView();
+  if (settings.view === "3d") {
+    remountPlayer();
+    if (current) applyAlgToPlayer(current);
+  }
 }
 
 function renderChrome(): void {
@@ -143,8 +157,11 @@ function renderChrome(): void {
 
   filtersEl.innerHTML = "";
   if (settings.phase === "practice") {
+    const sub = document.createElement("nav");
+    sub.className = "mode-tabs";
+    sub.setAttribute("aria-label", "Practice mode");
     tab(
-      filtersEl,
+      sub,
       [
         { id: "feed", label: "Feed" },
         { id: "select", label: "Select" },
@@ -157,12 +174,11 @@ function renderChrome(): void {
         renderAll();
       },
     );
+    filtersEl.append(sub);
   }
-  const viewTabs = document.createElement("nav");
-  viewTabs.className = "mode-tabs view-tabs";
-  viewTabs.setAttribute("aria-label", "Cube view");
+
   tab(
-    viewTabs,
+    viewTabsEl,
     [
       { id: "2d", label: "Top" },
       { id: "3d", label: "3D" },
@@ -175,7 +191,6 @@ function renderChrome(): void {
       applyView();
     },
   );
-  filtersEl.append(viewTabs);
 }
 
 function practicedCases(): CaseDef[] {
@@ -188,6 +203,25 @@ function learnCases(): CaseDef[] {
   return casesFor(settings.set).filter(
     (entry) => !getProgress(settings.set, entry.id).inPractice,
   );
+}
+
+function paintSolveCard(): void {
+  solveCard.setAttribute("aria-expanded", revealed ? "true" : "false");
+  if (!revealed || !current) {
+    solveBody.textContent = "Tap to reveal";
+    return;
+  }
+  solveBody.innerHTML = `${current.solveAlg}<span class="solve-hint">Tap to play</span>`;
+}
+
+function paintLearned(): void {
+  const on = Boolean(current && getProgress(current.set, current.caseId).inPractice);
+  btnLearned.setAttribute("aria-pressed", on ? "true" : "false");
+  btnLearned.textContent = "Learned";
+}
+
+async function paintDiagram(d: Deal): Promise<void> {
+  llDiagram.innerHTML = await llMarkup(d.setupAlg, d.set);
 }
 
 function showDeal(d: Deal): void {
@@ -203,30 +237,31 @@ function showDeal(d: Deal): void {
   setupKicker.textContent =
     d.set === "pll" ? "Setup · from solved" : "Setup · from last layer oriented";
   setupEl.textContent = d.setupAlg;
-  algsBox.hidden = true;
-  solveBtn.replaceChildren();
-  btnReveal.disabled = false;
-  btnReveal.textContent = "Reveal solve";
-  const inPractice = getProgress(d.set, d.caseId).inPractice;
-  btnPractice.textContent = inPractice ? "Remove from practice" : "Add to practice";
+  paintSolveCard();
+  paintLearned();
   btnNext.hidden = !(settings.phase === "practice" && settings.practiceSub === "feed");
-  remountPlayer();
-  applyAlgToPlayer(d);
+  showView();
+  void paintDiagram(d);
+  if (settings.view === "3d") {
+    remountPlayer();
+    applyAlgToPlayer(d);
+  }
   statusEl.textContent = d.displayName;
 }
 
 function reveal(): void {
-  if (!current) return;
+  if (!current || revealed) return;
   revealed = true;
-  btnReveal.textContent = "Solve shown";
-  btnReveal.disabled = true;
-  algsBox.hidden = false;
-  solveBtn.innerHTML = `<code>${current.solveAlg}</code>
-    <span class="alg-notes">Click to play</span>`;
+  paintSolveCard();
 }
 
 function playSolve(): void {
   if (!current) return;
+  settings.view = "3d";
+  saveSettings();
+  renderChrome();
+  showView();
+  remountPlayer();
   applyAlgToPlayer(current, true);
 }
 
@@ -247,13 +282,16 @@ function nextFeed(): void {
   showDeal(dealCase(settings.set, entry));
 }
 
-function renderGrid(entries: CaseDef[], title: string, lead: string): void {
+async function renderGrid(entries: CaseDef[], title: string, lead: string): Promise<void> {
   gridWrap.hidden = false;
   gridTitle.textContent = title;
   gridLead.textContent = lead;
+  const marks = await Promise.all(
+    entries.map((entry) => llMarkup(dealCase(settings.set, entry).setupAlg, settings.set, true)),
+  );
   gridEl.innerHTML = "";
   let lastGroup = "";
-  for (const entry of entries) {
+  entries.forEach((entry, i) => {
     if (entry.group !== lastGroup) {
       lastGroup = entry.group;
       const h = document.createElement("p");
@@ -270,6 +308,7 @@ function renderGrid(entries: CaseDef[], title: string, lead: string): void {
       (inPractice ? " in-practice" : "") +
       (current?.caseId === entry.id ? " current" : "");
     btn.dataset.id = entry.id;
+    btn.innerHTML = marks[i];
     const idEl = document.createElement("span");
     idEl.className = "cell-id";
     idEl.textContent = entry.id;
@@ -282,7 +321,7 @@ function renderGrid(entries: CaseDef[], title: string, lead: string): void {
       paintGridHighlight();
     });
     gridEl.append(btn);
-  }
+  });
 }
 
 function paintGridHighlight(): void {
@@ -292,11 +331,15 @@ function paintGridHighlight(): void {
   }
 }
 
-function renderAll(): void {
+let renderGen = 0;
+
+async function renderAll(): Promise<void> {
+  const gen = ++renderGen;
   renderChrome();
   emptyEl.hidden = true;
   emptyEl.textContent = "";
   gridWrap.hidden = true;
+  gridEl.innerHTML = "";
   const setLabel = settings.set.toUpperCase();
 
   if (settings.phase === "learn") {
@@ -306,8 +349,8 @@ function renderAll(): void {
       stageEl.hidden = true;
       current = null;
       emptyEl.hidden = false;
-      emptyEl.textContent = `Every ${setLabel} case is in practice. Remove one there if you want it back on this list.`;
-      statusEl.textContent = `${setLabel} · all in practice`;
+      emptyEl.textContent = `Every ${setLabel} case is marked Learned. Unmark one in Practice if you want it back here.`;
+      statusEl.textContent = `${setLabel} · all learned`;
       return;
     }
     const keep =
@@ -316,10 +359,11 @@ function renderAll(): void {
       pool.some((c) => c.id === current!.caseId);
     if (!keep) dealId(pool[0].id);
     else showDeal(dealCase(settings.set, pool.find((c) => c.id === current!.caseId)!));
-    renderGrid(
+    if (gen !== renderGen) return;
+    await renderGrid(
       pool,
       `Learn ${setLabel}`,
-      "Pick a case, give it a name if you want, then add it to practice.",
+      "Tap the solve card for the alg. Learned moves it into practice.",
     );
     statusEl.textContent = `${pool.length} left to learn`;
     return;
@@ -331,7 +375,7 @@ function renderAll(): void {
     current = null;
     emptyEl.hidden = false;
     emptyEl.innerHTML =
-      `Nothing in ${setLabel} practice yet. Switch to <strong>Learn</strong>, open a case, name it, and add it here.`;
+      `Nothing in ${setLabel} practice yet. Switch to <strong>Learn</strong> and mark a case Learned.`;
     statusEl.textContent = `${setLabel} · empty practice`;
     return;
   }
@@ -343,10 +387,11 @@ function renderAll(): void {
       pool.some((c) => c.id === current!.caseId);
     if (!keep) dealId(pool[0].id);
     else showDeal(dealCase(settings.set, pool.find((c) => c.id === current!.caseId)!));
-    renderGrid(
+    if (gen !== renderGen) return;
+    await renderGrid(
       pool,
       `Practice ${setLabel}`,
-      "Select the case you want to hit. Your name is on each cell.",
+      "The cases you marked Learned. Tap one to open it.",
     );
     btnNext.hidden = true;
     statusEl.textContent = `${pool.length} in practice`;
@@ -378,14 +423,16 @@ nameInput.addEventListener("input", () => {
 });
 
 btnNext.addEventListener("click", () => nextFeed());
-btnReveal.addEventListener("click", reveal);
-solveBtn.addEventListener("click", playSolve);
-btnPractice.addEventListener("click", () => {
+solveCard.addEventListener("click", () => {
+  if (!revealed) reveal();
+  else playSolve();
+});
+btnLearned.addEventListener("click", () => {
   if (!current) return;
   const now = getProgress(current.set, current.caseId);
   setProgress(current.set, current.caseId, { inPractice: !now.inPractice });
   current = null;
-  renderAll();
+  void renderAll();
 });
 
 window.addEventListener("keydown", (ev) => {
@@ -399,4 +446,4 @@ window.addEventListener("keydown", (ev) => {
   }
 });
 
-renderAll();
+void renderAll();

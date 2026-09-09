@@ -6,11 +6,11 @@ Two lists: **Learn** (not in rotation yet) and **Practice** (the ones you are dr
 
 ### Flow
 - **OLL / PLL** — last layer only.
-- **Learn** — pick a case, optional custom name, add it to practice.
+- **Learn** — pick a case, optional custom name, mark it **Learned** to move it into practice.
 - **Practice → Feed** — endless random from your practice list.
 - **Practice → Select** — hit a specific case from the grid.
 
-Each case screen: your name, last-layer view (**Top** like SolveTheCube, or **3D** with floating hint stickers like scramble.cubing.net), the setup alg from the base state (solved for PLL, last layer oriented / F2L done for OLL), and a revealable solve alg.
+Each case screen: your name, last-layer view (**Top** in SolveTheCube style — yellow vs grey for OLL, arrows for PLL — or **3D** with unused stickers greyed), the setup alg from the base state (solved for PLL, last layer oriented / F2L done for OLL), and a solve card you tap to reveal.
 
 Algs follow [SolveTheCube](https://solvethecube.com/algorithms): easy to memoise and turn, built around sexy `(R U R' U')`, sledge `(R' F R F')`, and `(R U R' U)`.
 
@@ -26,6 +26,7 @@ Progress lives in the browser (`localStorage`). Space = next in feed, R = reveal
 
 | ID | Title | Status |
 |----|-------|--------|
+| [MT-194](https://linear.app/menhir-holdings/issue/MT-194) | STC 2D, alg-card reveal, Learned | In progress |
 | [MT-193](https://linear.app/menhir-holdings/issue/MT-193) | OLL/PLL learn + practice UX | Done |
 | [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 trainer (superseded UX) | Closed |
 
