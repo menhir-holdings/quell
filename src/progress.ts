@@ -78,3 +78,14 @@ export function displayName(
   const nick = getProgress(set, id).name.trim();
   return nick || canonical;
 }
+
+/** Send every case back to Learn. Custom names stay. */
+export function resetLearned(): void {
+  const store = load();
+  for (const set of ["oll", "pll"] as const) {
+    for (const id of Object.keys(store[set] ?? {})) {
+      store[set][id] = { ...store[set][id], inPractice: false };
+    }
+  }
+  save(store);
+}

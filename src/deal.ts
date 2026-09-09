@@ -12,8 +12,12 @@ export function findCase(set: SetId, id: string): CaseDef | undefined {
   return casesFor(set).find((entry) => entry.id === id);
 }
 
-function flatten(moves: string): string {
+export function flatten(moves: string): string {
   return moves.replace(/[()]/g, "").replace(/\s+/g, " ").trim();
+}
+
+export function joinAlgs(...parts: string[]): string {
+  return parts.map(flatten).filter(Boolean).join(" ");
 }
 
 export function invertMoves(moves: string): string {
@@ -40,4 +44,10 @@ export function pickRandom(pool: CaseDef[], avoidId?: string): CaseDef {
       ? pool.filter((entry) => entry.id !== avoidId)
       : pool;
   return choices[Math.floor(Math.random() * choices.length)];
+}
+
+export function nextInOrder(pool: CaseDef[], currentId?: string): CaseDef {
+  const idx = pool.findIndex((entry) => entry.id === currentId);
+  if (idx < 0) return pool[0];
+  return pool[(idx + 1) % pool.length];
 }

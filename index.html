@@ -24,10 +24,38 @@
           <nav id="sets" class="mode-tabs" aria-label="Set"></nav>
           <nav id="phases" class="mode-tabs" aria-label="Phase"></nav>
         </div>
-        <p class="hero-meta" id="status"></p>
+        <div class="hero-end">
+          <p class="hero-meta" id="status"></p>
+          <div class="overflow">
+            <button
+              type="button"
+              id="btn-menu"
+              class="icon-btn"
+              aria-haspopup="menu"
+              aria-expanded="false"
+              aria-controls="menu"
+              aria-label="Menu"
+            >
+              <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true">
+                <path
+                  d="M4 7h16M4 12h16M4 17h16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+              </svg>
+            </button>
+            <div id="menu" class="menu" hidden role="menu">
+              <button type="button" role="menuitem" id="btn-reset-learned">
+                Reset learned cases
+              </button>
+            </div>
+          </div>
+        </div>
       </header>
 
-      <section class="filters" id="filters" aria-label="View and submode"></section>
+      <section class="filters" id="filters" aria-label="Practice controls"></section>
 
       <p id="empty" class="empty" hidden></p>
 
@@ -40,6 +68,9 @@
         <div class="meta">
           <p id="case-label" class="case-label"></p>
           <p id="case-sub" class="case-sub"></p>
+          <p id="practice-prompt" class="practice-prompt" hidden>
+            Execute this alg on the cube you have now.
+          </p>
           <label class="name-field">
             <span>Your name for this case</span>
             <input
@@ -50,10 +81,12 @@
               autocomplete="off"
             />
           </label>
-          <p class="scramble-kicker" id="setup-kicker">Setup</p>
-          <pre id="setup" class="scramble"></pre>
+          <div id="setup-block">
+            <p class="scramble-kicker" id="setup-kicker">Setup</p>
+            <pre id="setup" class="scramble"></pre>
+          </div>
           <button type="button" id="solve-card" class="solve-card" aria-expanded="false">
-            <span class="solve-kicker">Solve</span>
+            <span class="solve-kicker" id="solve-kicker">Solve</span>
             <span id="solve-body" class="solve-body">Tap to reveal</span>
           </button>
           <div class="actions">
@@ -73,6 +106,15 @@
         <div id="grid" class="case-grid"></div>
       </section>
     </div>
+
+    <dialog id="reset-dialog" class="confirm-dialog">
+      <form method="dialog" class="confirm-form">
+        <h2>Reset learned cases?</h2>
+        <p>Every OLL and PLL goes back to Learn. Names stay.</p>
+        <button type="submit" value="reset" class="pill warn">Reset learned</button>
+        <button type="submit" value="cancel" class="dialog-cancel">Cancel</button>
+      </form>
+    </dialog>
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
