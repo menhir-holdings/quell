@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Quell — learn and practice full OLL and PLL."
+    />
+    <title>Quell — OLL / PLL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Serif:ital,wght@0,600;1,400&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div id="app">
+      <header class="hero">
+        <div>
+          <h1>Quell</h1>
+          <p class="tagline">Learn the cases. Practice the ones you keep.</p>
+          <nav id="sets" class="mode-tabs" aria-label="Set"></nav>
+          <nav id="phases" class="mode-tabs" aria-label="Phase"></nav>
+        </div>
+        <p class="hero-meta" id="status"></p>
+      </header>
+
+      <section class="filters" id="filters" aria-label="View and submode"></section>
+
+      <p id="empty" class="empty" hidden></p>
+
+      <section class="stage" id="stage">
+        <div id="player-host" class="player-host"></div>
+        <div class="meta">
+          <p id="case-label" class="case-label"></p>
+          <p id="case-sub" class="case-sub"></p>
+          <label class="name-field">
+            <span>Your name for this case</span>
+            <input
+              id="custom-name"
+              type="text"
+              maxlength="40"
+              placeholder="e.g. headlights, sune fish, T"
+              autocomplete="off"
+            />
+          </label>
+          <p class="scramble-kicker" id="setup-kicker">Setup</p>
+          <pre id="setup" class="scramble"></pre>
+          <div class="actions">
+            <button type="button" id="btn-next" class="pill primary" hidden>
+              Next
+            </button>
+            <button type="button" id="btn-reveal" class="pill">
+              Reveal solve
+            </button>
+            <button type="button" id="btn-practice" class="pill"></button>
+          </div>
+          <div id="solve-box" class="solve-box" hidden>
+            <p class="scramble-kicker">Solve</p>
+            <button type="button" id="solve-alg" class="alg"></button>
+          </div>
+        </div>
+      </section>
+
+      <section id="grid-wrap" class="grid-wrap" hidden>
+        <h2 id="grid-title">Cases</h2>
+        <p class="section-lead" id="grid-lead"></p>
+        <div id="grid" class="case-grid"></div>
+      </section>
+    </div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
