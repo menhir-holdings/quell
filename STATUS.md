@@ -7,17 +7,14 @@
 
 ## Shipped
 
-None on `main` yet.
+- [MT-193](https://linear.app/menhir-holdings/issue/MT-193) — OLL/PLL learn + practice trainer  
+  Live: **https://quellcube.vercel.app** · [PR #2](https://github.com/menhir-holdings/quell/pull/2)
 
-## In flight
+## Closed
 
 | Issue | What |
 |-------|------|
-| [MT-193](https://linear.app/menhir-holdings/issue/MT-193) | OLL/PLL learn + practice — branch `ledoit/mt-193-ollpll-learn-practice-ux` |
-
-OLL and PLL only. Learn list vs practice list, custom names, Feed (endless random) and Select (grid), Top / 3D+hints, setup alg + reveal solve. Algs from SolveTheCube.
-
-| [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 trainer UX superseded by MT-193 — [PR #1](https://github.com/menhir-holdings/quell/pull/1) |
+| [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 multi-mode trainer — superseded, [PR #1](https://github.com/menhir-holdings/quell/pull/1) closed |
 
 ## Next
 

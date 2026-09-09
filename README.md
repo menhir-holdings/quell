@@ -18,6 +18,7 @@ Progress lives in the browser (`localStorage`). Space = next in feed, R = reveal
 
 ## Live
 
+- **App:** https://quellcube.vercel.app
 - **Linear:** [Quell](https://linear.app/menhir-holdings/project/quell-4c873f24ef7f) — authoritative SoT; see [STATUS.md](./STATUS.md)
 - **Repo:** https://github.com/menhir-holdings/quell
 
@@ -25,8 +26,8 @@ Progress lives in the browser (`localStorage`). Space = next in feed, R = reveal
 
 | ID | Title | Status |
 |----|-------|--------|
-| [MT-193](https://linear.app/menhir-holdings/issue/MT-193) | OLL/PLL learn + practice UX | In Progress |
-| [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 trainer (superseded UX) | In Review |
+| [MT-193](https://linear.app/menhir-holdings/issue/MT-193) | OLL/PLL learn + practice UX | Done |
+| [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 trainer (superseded UX) | Closed |
 
 ## Develop
 
