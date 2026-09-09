@@ -1,89 +1,75 @@
 import type { AlgVariant, CaseDef } from "../types";
 
-function a(moves: string, label: string, notes?: string): AlgVariant {
-  return notes ? { moves, label, notes } : { moves, label };
+function a(moves: string, notes?: string): AlgVariant[] {
+  return notes ? [{ moves, label: "STC", notes }] : [{ moves, label: "STC" }];
 }
 
 function c(
   id: string,
   name: string,
   group: string,
-  algs: AlgVariant[],
+  moves: string,
   twoLook = false,
+  notes?: string,
 ): CaseDef {
-  return { id, name, group, twoLook, algs };
+  return { id, name, group, twoLook, algs: a(moves, notes) };
 }
 
-/** 21 PLLs. twoLook = EPLL + CPLL used in 2-look. */
+/** 21 PLLs. Algs from SolveTheCube. */
 export const PLL: CaseDef[] = [
-  c("Ua", "Ua", "EPLL", [
-    a("R U' R U R U R U' R' U' R2", "main", "RU — no M slice"),
-    a("M2 U M U2 M' U M2", "M-gen", "faster if slice is clean"),
-  ], true),
-  c("Ub", "Ub", "EPLL", [
-    a("R2 U R U R' U' R' U' R' U R'", "main", "RU"),
-    a("M2 U' M U2 M' U' M2", "M-gen"),
-  ], true),
-  c("H", "H", "EPLL", [a("M2 U M2 U2 M2 U M2", "main", "pure slice")], true),
-  c("Z", "Z", "EPLL", [
-    a("M' U M2 U M2 U M' U2 M2", "main"),
-    a("M2 U M2 U M' U2 M2 U2 M'", "alt", "start with M2"),
-  ], true),
-  c("Aa", "Aa", "CPLL", [
-    a("x R' U R' D2 R U' R' D2 R2", "main", "x then RUD"),
-  ], true),
-  c("Ab", "Ab", "CPLL", [
-    a("x R2 D2 R U R' D2 R U' R", "main"),
-  ], true),
-  c("E", "E", "CPLL", [
-    a("x' R U' R' D R U R' D' R U R' D R U' R' D'", "main"),
-  ], true),
-  c("T", "T", "Adjacent", [
-    a("R U R' U' R' F R2 U' R' U' R U R' F'", "main", "standard T"),
-  ]),
-  c("F", "F", "Adjacent", [
-    a("R' U' F' R U R' U' R' F R2 U' R' U' R U R' U R", "main"),
-  ]),
-  c("Ja", "Ja", "Adjacent", [
-    a("L' U' L F L' U' L U L F' L2 U L", "main", "lefty J"),
-    a("x R2 F R F' R U2 r' U r U2", "wide"),
-  ]),
-  c("Jb", "Jb", "Adjacent", [
-    a("R U R' F' R U R' U' R' F R2 U' R'", "main", "T-shaped J — fastest J"),
-  ]),
-  c("Ra", "Ra", "Adjacent", [
-    a("R U' R' U' R U R D R' U' R D' R' U2 R'", "main"),
-  ]),
-  c("Rb", "Rb", "Adjacent", [
-    a("R' U2 R U2 R' F R U R' U' R' F' R2 U'", "main"),
-  ]),
-  c("Na", "Na", "Opposite", [
-    a("R U R' U R U R' F' R U R' U' R' F R2 U' R' U2 R U' R'", "main"),
-    a("R F U' R' U R U F' R2 F' R U R U' R' F", "alt"),
-  ]),
-  c("Nb", "Nb", "Opposite", [
-    a("R' U R U' R' F' U' F R U R' F R' F' R U' R", "main"),
-    a("r' D' F r U' r' F' D r2 U r' U' r' U r U r'", "wide"),
-  ]),
-  c("V", "V", "Opposite", [
-    a("R' U R' U' y R' F' R2 U' R' U R' F R F", "main"),
-    a("R' U R' U' R D' R' D R' U D' R2 U' R2 D R2", "RUD", "no y"),
-  ]),
-  c("Y", "Y", "Opposite", [
-    a("F R U' R' U' R U R' F' R U R' U' R' F R F'", "main"),
-  ]),
-  c("Ga", "Ga", "G", [
-    a("R2 U R' U R' U' R U' R2 U' D R' U R D'", "main"),
-  ]),
-  c("Gb", "Gb", "G", [
-    a("R' U' R U D' R2 U R' U R U' R U' R2 D", "main"),
-  ]),
-  c("Gc", "Gc", "G", [
-    a("R2 U' R U' R U R' U R2 U D' R U' R' D", "main"),
-  ]),
-  c("Gd", "Gd", "G", [
-    a("R U R' U' D R2 U' R U' R' U R' U R2 D'", "main"),
-  ]),
+  c("H", "H", "EPLL", "(M2 U M2) U2 (M2 U M2)", true),
+  c(
+    "Z",
+    "Z",
+    "EPLL",
+    "R' U' R2 U (R U R' U') R U R U' R U' R' U2",
+    true,
+  ),
+  c("Ub", "Ub", "EPLL", "R2 U' (R' U' R) U R U (R U' R)", true),
+  c("Ua", "Ua", "EPLL", "(R' U R' U') R' U' (R' U R) U R2", true),
+  c("Aa", "Aa", "CPLL", "x z' R2 U2 (R' D' R) U2 (R' D R') z x'", true),
+  c("Ab", "Ab", "CPLL", "x R2 D2 (R U R') D2 (R U' R) x'", true),
+  c(
+    "E",
+    "E",
+    "CPLL",
+    "R2 U R' U' y (R U R' U') (R U R' U') (R U R') y' (R U' R2')",
+    true,
+  ),
+  c("T", "T", "Adjacent", "(R U R' U') R' F R2 U' R' U' R U R' F'"),
+  c(
+    "Y",
+    "Y",
+    "Opposite",
+    "(F R U' R') U' (R U R' F') (R U R' U') (R' F R F')",
+  ),
+  c(
+    "F",
+    "F",
+    "Adjacent",
+    "U' (R' U R U') R2 (F' U' F U) x (R U R' U') R2 x'",
+  ),
+  c("V", "V", "Opposite", "(R' U R' U') y (R' D R' D') R2 y' (R' B' R B R)"),
+  c("Ja", "Ja", "Adjacent", "L' U' L F (L' U' L U) L F' L2 U L U"),
+  c("Jb", "Jb", "Adjacent", "R U R' F' (R U R' U') R' F R2 U' R' U'"),
+  c("Ra", "Ra", "Adjacent", "(L U2 L') U2 L F' (L' U' L U) L F L2 U"),
+  c("Rb", "Rb", "Adjacent", "(R' U2 R) U2 R' F (R U R' U') R' F' R2 U'"),
+  c(
+    "Na",
+    "Na",
+    "Opposite",
+    "(R U R' U) (R U R' F') (R U R' U') R' F R2 U' R' U2 (R U' R')",
+  ),
+  c(
+    "Nb",
+    "Nb",
+    "Opposite",
+    "(R' U R U') R' (F' U' F) (R U R' F) R' F' (R U' R)",
+  ),
+  c("Ga", "Ga", "G", "y R2' u (R' U R' U') (R u' R2) y' (R' U R)"),
+  c("Gb", "Gb", "G", "(R' U' R) y R2 u (R' U R U') (R u' R2)"),
+  c("Gc", "Gc", "G", "y R2' u' R U' (R U R' u) R2 y (R U' R')"),
+  c("Gd", "Gd", "G", "y2 (R U R') y' (R2 u' R) U' (R' U R') u R2"),
 ];
 
 export const PLL_GROUPS = ["EPLL", "CPLL", "Adjacent", "Opposite", "G"];

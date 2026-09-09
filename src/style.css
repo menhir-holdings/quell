@@ -112,6 +112,7 @@ body {
   flex-wrap: wrap;
   gap: 0.75rem 1.25rem;
   align-items: center;
+  width: 100%;
 }
 
 .check,
@@ -172,32 +173,58 @@ body {
   gap: 0.75rem;
 }
 
-.hold {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 0.4rem 0.55rem;
-  padding: 0.65rem 0.85rem;
-  border: 1px solid var(--accent);
-  background: var(--accent-dim);
+.case-label {
+  font-family: var(--font-display);
+  font-size: 1.45rem;
 }
 
-.swatch {
-  width: 0.9rem;
-  height: 0.9rem;
-  border-radius: 2px;
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  display: inline-block;
-}
-
-.hold .dot,
-.hold .muted {
+.case-sub {
   color: var(--muted);
 }
 
-.case-label {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
+.name-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 11px;
+}
+
+.name-field input {
+  font: inherit;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 0.55rem 0.7rem;
+}
+
+.empty {
+  color: var(--muted);
+  padding: 1rem 0;
+}
+
+.filters .mode-tabs {
+  margin-top: 0;
+}
+
+.group-label {
+  grid-column: 1 / -1;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  font-size: 11px;
+  margin-top: 0.5rem;
+}
+
+.solve-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
 }
 
 .scramble-kicker {
@@ -270,25 +297,40 @@ body {
 
 .case-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(2.6rem, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(7.2rem, 1fr));
   gap: 0.35rem;
 }
 
 .case-cell {
-  min-height: 2.4rem;
+  min-height: 3.4rem;
   border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 0.1rem;
+  padding: 0.4rem 0.5rem;
+  text-align: left;
 }
 
-.case-cell.known {
-  background: rgba(110, 207, 138, 0.18);
+.cell-id {
+  color: var(--muted);
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.cell-name {
+  font-size: 12px;
+  line-height: 1.3;
+}
+
+.case-cell.in-practice {
+  background: rgba(110, 207, 138, 0.14);
   border-color: var(--ok);
 }
 
-.case-cell.learning {
-  background: rgba(224, 180, 95, 0.16);
-  border-color: var(--warn);
-}
-
-.case-cell.twolook {
-  opacity: 0.72;
+.case-cell.current {
+  border-color: var(--accent);
+  background: var(--accent-dim);
 }

@@ -1,4 +1,10 @@
-export type Mode = "oll" | "pll" | "twogen" | "full" | "f2l";
+export type SetId = "oll" | "pll";
+
+export type Phase = "learn" | "practice";
+
+export type PracticeSub = "feed" | "select";
+
+export type CubeView = "2d" | "3d";
 
 export type AlgVariant = {
   moves: string;
@@ -14,35 +20,25 @@ export type CaseDef = {
   algs: AlgVariant[];
 };
 
-export type StickerColor = "white" | "yellow" | "green" | "blue" | "red" | "orange";
-
-export type Hold = {
-  rot: string;
-  u: StickerColor;
-  f: StickerColor;
-  wca: boolean;
-};
-
 export type Deal = {
-  mode: Mode;
-  hold: Hold;
-  scramble: string;
+  set: SetId;
+  caseId: string;
+  canonicalName: string;
+  displayName: string;
+  group: string;
   setupAlg: string;
-  caseId?: string;
-  caseName: string;
-  group?: string;
-  algs: AlgVariant[];
-  stickering: "full" | "OLL" | "PLL" | "F2L";
+  solveAlg: string;
+  stickering: "OLL" | "PLL";
 };
 
-export type KnownState = "unseen" | "learning" | "known";
+export type CaseProgress = {
+  inPractice: boolean;
+  name: string;
+};
 
 export type Settings = {
-  mode: Mode;
-  skipTwoLook: boolean;
-  randomHold: boolean;
-  randomAuf: boolean;
-  f2lPairs: "1" | "2" | "3" | "4" | "random";
-  ollGroup: string;
-  pllGroup: string;
+  set: SetId;
+  phase: Phase;
+  practiceSub: PracticeSub;
+  view: CubeView;
 };

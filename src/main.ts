@@ -1,44 +1,30 @@
 import { TwistyPlayer } from "cubing/twisty";
-import { OLL, OLL_GROUPS } from "./data/oll";
-import { PLL, PLL_GROUPS } from "./data/pll";
-import { F2L } from "./data/f2l";
-import { deal } from "./deal";
-import { COLOR_LABEL, STICKER_HEX } from "./hold";
-import { cycleState, getState } from "./progress";
-import type { Deal, Mode, Settings } from "./types";
+import { casesFor, dealCase, pickRandom } from "./deal";
+import { displayName, getProgress, setProgress } from "./progress";
+import type { CaseDef, CubeView, Deal, Phase, PracticeSub, SetId, Settings } from "./types";
 import "./style.css";
 
-const SETTINGS_KEY = "quell.settings.v1";
-
-const MODES: { id: Mode; label: string }[] = [
-  { id: "oll", label: "OLL" },
-  { id: "pll", label: "PLL" },
-  { id: "twogen", label: "2-gen" },
-  { id: "full", label: "Full" },
-  { id: "f2l", label: "F2L" },
-];
+const SETTINGS_KEY = "quell.settings.v2";
 
 const DEFAULTS: Settings = {
-  mode: "oll",
-  skipTwoLook: true,
-  randomHold: true,
-  randomAuf: true,
-  f2lPairs: "1",
-  ollGroup: "all",
-  pllGroup: "all",
+  set: "oll",
+  phase: "learn",
+  practiceSub: "feed",
+  view: "2d",
 };
 
 function loadSettings(): Settings {
   try {
     const raw = localStorage.getItem(SETTINGS_KEY);
     if (!raw) return { ...DEFAULTS };
-    return { ...DEFAULTS, ...(JSON.parse(raw) as Partial<Settings>) };
+    const parsed = JSON.parse(raw) as Partial<Settings>;
+    return { ...DEFAULTS, ...parsed };
   } catch {
     return { ...DEFAULTS };
   }
 }
 
-function saveSettings(settings: Settings): void {
+function saveSettings(): void {
   localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
 }
 
@@ -46,24 +32,31 @@ const settings = loadSettings();
 let current: Deal | null = null;
 let revealed = false;
 
-const modesEl = document.querySelector("#modes") as HTMLElement;
+const setsEl = document.querySelector("#sets") as HTMLElement;
+const phasesEl = document.querySelector("#phases") as HTMLElement;
 const filtersEl = document.querySelector("#filters") as HTMLElement;
-const holdEl = document.querySelector("#hold") as HTMLElement;
-const caseEl = document.querySelector("#case-label") as HTMLElement;
-const scrambleEl = document.querySelector("#scramble") as HTMLElement;
 const statusEl = document.querySelector("#status") as HTMLElement;
-const algsEl = document.querySelector("#algs") as HTMLElement;
+const emptyEl = document.querySelector("#empty") as HTMLElement;
+const stageEl = document.querySelector("#stage") as HTMLElement;
+const caseEl = document.querySelector("#case-label") as HTMLElement;
+const subEl = document.querySelector("#case-sub") as HTMLElement;
+const nameInput = document.querySelector("#custom-name") as HTMLInputElement;
+const setupKicker = document.querySelector("#setup-kicker") as HTMLElement;
+const setupEl = document.querySelector("#setup") as HTMLElement;
+const algsBox = document.querySelector("#solve-box") as HTMLElement;
+const solveBtn = document.querySelector("#solve-alg") as HTMLButtonElement;
 const gridEl = document.querySelector("#grid") as HTMLElement;
 const gridWrap = document.querySelector("#grid-wrap") as HTMLElement;
 const gridTitle = document.querySelector("#grid-title") as HTMLElement;
+const gridLead = document.querySelector("#grid-lead") as HTMLElement;
 const btnNext = document.querySelector("#btn-next") as HTMLButtonElement;
 const btnReveal = document.querySelector("#btn-reveal") as HTMLButtonElement;
-const btnKnown = document.querySelector("#btn-known") as HTMLButtonElement;
+const btnPractice = document.querySelector("#btn-practice") as HTMLButtonElement;
 const playerHost = document.querySelector("#player-host") as HTMLElement;
 
 const player = new TwistyPlayer({
   puzzle: "3x3x3",
-  visualization: "3D",
+  visualization: "experimental-2D-LL",
   background: "none",
   controlPanel: "none",
   hintFacelets: "none",
@@ -75,274 +68,316 @@ player.style.width = "100%";
 player.style.height = "100%";
 playerHost.append(player);
 
-function renderModes(): void {
-  modesEl.innerHTML = "";
-  for (const mode of MODES) {
+function tab(
+  parent: HTMLElement,
+  items: { id: string; label: string }[],
+  active: string,
+  onPick: (id: string) => void,
+): void {
+  parent.innerHTML = "";
+  for (const item of items) {
     const btn = document.createElement("button");
     btn.type = "button";
-    btn.className = "mode-tab" + (settings.mode === mode.id ? " active" : "");
-    btn.textContent = mode.label;
-    btn.addEventListener("click", () => {
-      settings.mode = mode.id;
-      saveSettings(settings);
-      renderModes();
-      renderFilters();
-      renderGrid();
-      void nextDeal();
-    });
-    modesEl.append(btn);
+    btn.className = "mode-tab" + (item.id === active ? " active" : "");
+    btn.textContent = item.label;
+    btn.addEventListener("click", () => onPick(item.id));
+    parent.append(btn);
   }
 }
 
-function checkbox(
-  id: string,
-  label: string,
-  checked: boolean,
-  onChange: (v: boolean) => void,
-): HTMLLabelElement {
-  const wrap = document.createElement("label");
-  wrap.className = "check";
-  const input = document.createElement("input");
-  input.type = "checkbox";
-  input.id = id;
-  input.checked = checked;
-  input.addEventListener("change", () => onChange(input.checked));
-  wrap.append(input, document.createTextNode(label));
-  return wrap;
-}
-
-function select(
-  id: string,
-  label: string,
-  value: string,
-  options: { value: string; label: string }[],
-  onChange: (v: string) => void,
-): HTMLLabelElement {
-  const wrap = document.createElement("label");
-  wrap.className = "select";
-  const span = document.createElement("span");
-  span.textContent = label;
-  const sel = document.createElement("select");
-  sel.id = id;
-  for (const opt of options) {
-    const el = document.createElement("option");
-    el.value = opt.value;
-    el.textContent = opt.label;
-    sel.append(el);
+function applyView(): void {
+  const view: CubeView = settings.view;
+  if (view === "2d") {
+    player.visualization = "experimental-2D-LL";
+    player.hintFacelets = "none";
+  } else {
+    player.visualization = "3D";
+    player.hintFacelets = "floating";
   }
-  sel.value = value;
-  sel.addEventListener("change", () => onChange(sel.value));
-  wrap.append(span, sel);
-  return wrap;
 }
 
-function persist(): void {
-  saveSettings(settings);
-  renderGrid();
-  void nextDeal();
-}
-
-function renderFilters(): void {
-  filtersEl.innerHTML = "";
-  filtersEl.append(
-    checkbox("random-hold", "Random hold", settings.randomHold, (v) => {
-      settings.randomHold = v;
-      persist();
-    }),
+function renderChrome(): void {
+  tab(
+    setsEl,
+    [
+      { id: "oll", label: "OLL" },
+      { id: "pll", label: "PLL" },
+    ],
+    settings.set,
+    (id) => {
+      settings.set = id as SetId;
+      saveSettings();
+      current = null;
+      renderAll();
+    },
+  );
+  tab(
+    phasesEl,
+    [
+      { id: "learn", label: "Learn" },
+      { id: "practice", label: "Practice" },
+    ],
+    settings.phase,
+    (id) => {
+      settings.phase = id as Phase;
+      saveSettings();
+      current = null;
+      renderAll();
+    },
   );
 
-  if (settings.mode === "oll" || settings.mode === "pll") {
-    filtersEl.append(
-      checkbox("skip-2look", "Skip 2-look cases", settings.skipTwoLook, (v) => {
-        settings.skipTwoLook = v;
-        persist();
-      }),
-      checkbox("random-auf", "Random AUF", settings.randomAuf, (v) => {
-        settings.randomAuf = v;
-        persist();
-      }),
+  filtersEl.innerHTML = "";
+  if (settings.phase === "practice") {
+    tab(
+      filtersEl,
+      [
+        { id: "feed", label: "Feed" },
+        { id: "select", label: "Select" },
+      ],
+      settings.practiceSub,
+      (id) => {
+        settings.practiceSub = id as PracticeSub;
+        saveSettings();
+        current = null;
+        renderAll();
+      },
     );
   }
-
-  if (settings.mode === "oll") {
-    filtersEl.append(
-      select(
-        "oll-group",
-        "Group",
-        settings.ollGroup,
-        [{ value: "all", label: "All" }, ...OLL_GROUPS.map((g) => ({ value: g, label: g }))],
-        (v) => {
-          settings.ollGroup = v;
-          persist();
-        },
-      ),
-    );
-  }
-
-  if (settings.mode === "pll") {
-    filtersEl.append(
-      select(
-        "pll-group",
-        "Group",
-        settings.pllGroup,
-        [{ value: "all", label: "All" }, ...PLL_GROUPS.map((g) => ({ value: g, label: g }))],
-        (v) => {
-          settings.pllGroup = v;
-          persist();
-        },
-      ),
-    );
-  }
-
-  if (settings.mode === "f2l") {
-    filtersEl.append(
-      select(
-        "f2l-pairs",
-        "Pairs left",
-        settings.f2lPairs,
-        [
-          { value: "1", label: "1" },
-          { value: "2", label: "2" },
-          { value: "3", label: "3" },
-          { value: "4", label: "4" },
-          { value: "random", label: "Random 1–4" },
-        ],
-        (v) => {
-          settings.f2lPairs = v as Settings["f2lPairs"];
-          persist();
-        },
-      ),
-    );
-  }
+  const viewTabs = document.createElement("nav");
+  viewTabs.className = "mode-tabs view-tabs";
+  viewTabs.setAttribute("aria-label", "Cube view");
+  tab(
+    viewTabs,
+    [
+      { id: "2d", label: "Top" },
+      { id: "3d", label: "3D" },
+    ],
+    settings.view,
+    (id) => {
+      settings.view = id as CubeView;
+      saveSettings();
+      applyView();
+    },
+  );
+  filtersEl.append(viewTabs);
 }
 
-function swatch(color: keyof typeof STICKER_HEX): string {
-  return `<span class="swatch" style="background:${STICKER_HEX[color]}"></span>`;
+function practicedCases(): CaseDef[] {
+  return casesFor(settings.set).filter(
+    (entry) => getProgress(settings.set, entry.id).inPractice,
+  );
+}
+
+function learnCases(): CaseDef[] {
+  return casesFor(settings.set).filter(
+    (entry) => !getProgress(settings.set, entry.id).inPractice,
+  );
 }
 
 function showDeal(d: Deal): void {
   current = d;
   revealed = false;
-  holdEl.innerHTML = `${swatch(d.hold.u)} <strong>U ${COLOR_LABEL[d.hold.u]}</strong>
-    <span class="dot">·</span>
-    ${swatch(d.hold.f)} <strong>F ${COLOR_LABEL[d.hold.f]}</strong>
-    ${d.hold.wca ? '<span class="muted">WCA</span>' : ""}`;
-  caseEl.textContent = d.group ? `${d.caseName} · ${d.group}` : d.caseName;
-  scrambleEl.textContent = d.scramble;
-  algsEl.hidden = true;
-  algsEl.innerHTML = "";
-  const canReveal = d.algs.length > 0;
-  btnReveal.hidden = !canReveal;
+  stageEl.hidden = false;
+  caseEl.textContent = d.displayName;
+  subEl.textContent =
+    d.displayName === d.canonicalName
+      ? `${d.group}`
+      : `${d.canonicalName} · ${d.group}`;
+  nameInput.value = getProgress(d.set, d.caseId).name;
+  setupKicker.textContent =
+    d.set === "pll" ? "Setup · from solved" : "Setup · from last layer oriented";
+  setupEl.textContent = d.setupAlg;
+  algsBox.hidden = true;
+  solveBtn.replaceChildren();
   btnReveal.disabled = false;
-  btnReveal.textContent = "Reveal alg";
-  const track = d.caseId && (d.mode === "oll" || d.mode === "pll" || d.mode === "f2l");
-  btnKnown.hidden = !track;
-  if (track && d.caseId) {
-    const state = getState(d.mode, d.caseId);
-    btnKnown.textContent =
-      state === "known" ? "Known" : state === "learning" ? "Learning" : "Unseen";
-  }
-
-  player.experimentalSetupAlg = d.setupAlg;
+  btnReveal.textContent = "Reveal solve";
+  const inPractice = getProgress(d.set, d.caseId).inPractice;
+  btnPractice.textContent = inPractice ? "Remove from practice" : "Add to practice";
+  btnNext.hidden = !(settings.phase === "practice" && settings.practiceSub === "feed");
+  applyView();
+  player.experimentalSetupAlg = `z2 ${d.setupAlg}`;
   player.alg = "";
   player.experimentalSetupAnchor = "start";
   player.experimentalStickering = d.stickering;
   player.controlPanel = "none";
-  statusEl.textContent = d.caseName;
+  statusEl.textContent = d.displayName;
 }
 
 function reveal(): void {
-  if (!current || current.algs.length === 0) return;
+  if (!current) return;
   revealed = true;
-  btnReveal.textContent = "Algs shown";
+  btnReveal.textContent = "Solve shown";
   btnReveal.disabled = true;
-  algsEl.hidden = false;
-  algsEl.innerHTML = "";
-  for (const alg of current.algs) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "alg";
-    btn.innerHTML = `<span class="alg-label">${alg.label}</span>
-      <code>${alg.moves}</code>
-      ${alg.notes ? `<span class="alg-notes">${alg.notes}</span>` : ""}`;
-    btn.addEventListener("click", () => playAlg(alg.moves));
-    algsEl.append(btn);
-  }
+  algsBox.hidden = false;
+  solveBtn.innerHTML = `<code>${current.solveAlg}</code>
+    <span class="alg-notes">Click to play</span>`;
 }
 
-function playAlg(moves: string): void {
+function playSolve(): void {
   if (!current) return;
-  player.experimentalSetupAlg = current.setupAlg;
+  player.experimentalSetupAlg = `z2 ${current.setupAlg}`;
   player.experimentalSetupAnchor = "start";
-  player.alg = moves;
+  player.alg = current.solveAlg;
   player.controlPanel = "bottom-row";
   player.play();
 }
 
-async function nextDeal(forcedId?: string): Promise<void> {
-  statusEl.textContent = "Dealing…";
-  btnNext.disabled = true;
-  try {
-    const next = await deal(settings, forcedId);
-    showDeal(next);
-    renderGrid();
-  } catch (err) {
-    statusEl.textContent = "Deal failed";
-    scrambleEl.textContent = err instanceof Error ? err.message : String(err);
-    btnReveal.hidden = true;
-  } finally {
-    btnNext.disabled = false;
-  }
+function dealId(id: string): void {
+  const entry = casesFor(settings.set).find((c) => c.id === id);
+  if (!entry) return;
+  showDeal(dealCase(settings.set, entry));
 }
 
-function casesForGrid() {
-  if (settings.mode === "oll") return OLL;
-  if (settings.mode === "pll") return PLL;
-  if (settings.mode === "f2l") return F2L;
-  return null;
-}
-
-function renderGrid(): void {
-  const cases = casesForGrid();
-  if (!cases) {
-    gridWrap.hidden = true;
+function nextFeed(): void {
+  const pool = practicedCases();
+  if (!pool.length) {
+    current = null;
+    stageEl.hidden = true;
     return;
   }
+  const entry = pickRandom(pool, current?.caseId);
+  showDeal(dealCase(settings.set, entry));
+}
+
+function renderGrid(entries: CaseDef[], title: string, lead: string): void {
   gridWrap.hidden = false;
-  gridTitle.textContent = settings.mode === "oll" ? "OLL 1–57" : settings.mode === "pll" ? "PLL" : "F2L 1–41";
+  gridTitle.textContent = title;
+  gridLead.textContent = lead;
   gridEl.innerHTML = "";
-  for (const entry of cases) {
+  let lastGroup = "";
+  for (const entry of entries) {
+    if (entry.group !== lastGroup) {
+      lastGroup = entry.group;
+      const h = document.createElement("p");
+      h.className = "group-label";
+      h.textContent = entry.group;
+      gridEl.append(h);
+    }
     const btn = document.createElement("button");
     btn.type = "button";
-    const state = getState(settings.mode, entry.id);
-    btn.className = `case-cell ${state}${entry.twoLook ? " twolook" : ""}`;
-    btn.title = `${entry.name} · ${entry.group} · ${state}. Click to deal, shift-click to mark.`;
-    btn.textContent = entry.id;
-    btn.addEventListener("click", (ev) => {
-      if (ev.shiftKey) {
-        cycleState(settings.mode, entry.id);
-        renderGrid();
-        if (current?.caseId === entry.id) {
-          const s = getState(settings.mode, entry.id);
-          btnKnown.textContent =
-            s === "known" ? "Known" : s === "learning" ? "Learning" : "Unseen";
-        }
-        return;
-      }
-      void nextDeal(entry.id);
+    const nick = displayName(settings.set, entry.id, entry.name);
+    const inPractice = getProgress(settings.set, entry.id).inPractice;
+    btn.className =
+      "case-cell" +
+      (inPractice ? " in-practice" : "") +
+      (current?.caseId === entry.id ? " current" : "");
+    btn.dataset.id = entry.id;
+    const idEl = document.createElement("span");
+    idEl.className = "cell-id";
+    idEl.textContent = entry.id;
+    const nameEl = document.createElement("span");
+    nameEl.className = "cell-name";
+    nameEl.textContent = nick;
+    btn.append(idEl, nameEl);
+    btn.addEventListener("click", () => {
+      dealId(entry.id);
+      paintGridHighlight();
     });
     gridEl.append(btn);
   }
 }
 
-btnNext.addEventListener("click", () => void nextDeal());
+function paintGridHighlight(): void {
+  for (const node of gridEl.querySelectorAll(".case-cell")) {
+    const btn = node as HTMLButtonElement;
+    btn.classList.toggle("current", btn.dataset.id === current?.caseId);
+  }
+}
+
+function renderAll(): void {
+  renderChrome();
+  emptyEl.hidden = true;
+  emptyEl.textContent = "";
+  gridWrap.hidden = true;
+  const setLabel = settings.set.toUpperCase();
+
+  if (settings.phase === "learn") {
+    const pool = learnCases();
+    btnNext.hidden = true;
+    if (!pool.length) {
+      stageEl.hidden = true;
+      current = null;
+      emptyEl.hidden = false;
+      emptyEl.textContent = `Every ${setLabel} case is in practice. Remove one there if you want it back on this list.`;
+      statusEl.textContent = `${setLabel} · all in practice`;
+      return;
+    }
+    const keep =
+      current &&
+      current.set === settings.set &&
+      pool.some((c) => c.id === current!.caseId);
+    if (!keep) dealId(pool[0].id);
+    else showDeal(dealCase(settings.set, pool.find((c) => c.id === current!.caseId)!));
+    renderGrid(
+      pool,
+      `Learn ${setLabel}`,
+      "Pick a case, give it a name if you want, then add it to practice.",
+    );
+    statusEl.textContent = `${pool.length} left to learn`;
+    return;
+  }
+
+  const pool = practicedCases();
+  if (!pool.length) {
+    stageEl.hidden = true;
+    current = null;
+    emptyEl.hidden = false;
+    emptyEl.innerHTML =
+      `Nothing in ${setLabel} practice yet. Switch to <strong>Learn</strong>, open a case, name it, and add it here.`;
+    statusEl.textContent = `${setLabel} · empty practice`;
+    return;
+  }
+
+  if (settings.practiceSub === "select") {
+    const keep =
+      current &&
+      current.set === settings.set &&
+      pool.some((c) => c.id === current!.caseId);
+    if (!keep) dealId(pool[0].id);
+    else showDeal(dealCase(settings.set, pool.find((c) => c.id === current!.caseId)!));
+    renderGrid(
+      pool,
+      `Practice ${setLabel}`,
+      "Select the case you want to hit. Your name is on each cell.",
+    );
+    btnNext.hidden = true;
+    statusEl.textContent = `${pool.length} in practice`;
+    return;
+  }
+
+  btnNext.hidden = false;
+  nextFeed();
+  statusEl.textContent = `${setLabel} feed · ${pool.length} cases`;
+}
+
+nameInput.addEventListener("input", () => {
+  if (!current) return;
+  setProgress(current.set, current.caseId, { name: nameInput.value });
+  current.displayName = displayName(
+    current.set,
+    current.caseId,
+    current.canonicalName,
+  );
+  caseEl.textContent = current.displayName;
+  subEl.textContent =
+    current.displayName === current.canonicalName
+      ? current.group
+      : `${current.canonicalName} · ${current.group}`;
+  const cell = gridEl.querySelector(
+    `.case-cell[data-id="${current.caseId}"] .cell-name`,
+  );
+  if (cell) cell.textContent = current.displayName;
+});
+
+btnNext.addEventListener("click", () => nextFeed());
 btnReveal.addEventListener("click", reveal);
-btnKnown.addEventListener("click", () => {
-  if (!current?.caseId) return;
-  const state = cycleState(current.mode, current.caseId);
-  btnKnown.textContent =
-    state === "known" ? "Known" : state === "learning" ? "Learning" : "Unseen";
-  renderGrid();
+solveBtn.addEventListener("click", playSolve);
+btnPractice.addEventListener("click", () => {
+  if (!current) return;
+  const now = getProgress(current.set, current.caseId);
+  setProgress(current.set, current.caseId, { inPractice: !now.inPractice });
+  current = null;
+  renderAll();
 });
 
 window.addEventListener("keydown", (ev) => {
@@ -350,13 +385,10 @@ window.addEventListener("keydown", (ev) => {
   if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA") return;
   if (ev.code === "Space") {
     ev.preventDefault();
-    void nextDeal();
+    if (settings.phase === "practice" && settings.practiceSub === "feed") nextFeed();
   } else if (ev.key === "r" || ev.key === "R") {
     if (!revealed) reveal();
   }
 });
 
-renderModes();
-renderFilters();
-renderGrid();
-void nextDeal();
+renderAll();

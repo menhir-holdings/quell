@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
       name="description"
-      content="Quell — 3x3 CFOP trainer. Full OLL/PLL, 2-gen RU, F2L, and full solves."
+      content="Quell — learn and practice full OLL and PLL."
     />
-    <title>Quell — 3x3 CFOP trainer</title>
+    <title>Quell — OLL / PLL</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -20,36 +20,53 @@
       <header class="hero">
         <div>
           <h1>Quell</h1>
-          <p class="tagline">2-look is done. Full CFOP from here.</p>
-          <nav id="modes" class="mode-tabs" aria-label="Trainer mode"></nav>
+          <p class="tagline">Learn the cases. Practice the ones you keep.</p>
+          <nav id="sets" class="mode-tabs" aria-label="Set"></nav>
+          <nav id="phases" class="mode-tabs" aria-label="Phase"></nav>
         </div>
-        <p class="hero-meta" id="status">Dealing…</p>
+        <p class="hero-meta" id="status"></p>
       </header>
 
-      <section class="filters" id="filters" aria-label="Filters"></section>
+      <section class="filters" id="filters" aria-label="View and submode"></section>
 
-      <section class="stage">
+      <p id="empty" class="empty" hidden></p>
+
+      <section class="stage" id="stage" hidden>
         <div id="player-host" class="player-host"></div>
         <div class="meta">
-          <div id="hold" class="hold"></div>
           <p id="case-label" class="case-label"></p>
-          <p class="scramble-kicker">Scramble · apply in this hold</p>
-          <pre id="scramble" class="scramble"></pre>
+          <p id="case-sub" class="case-sub"></p>
+          <label class="name-field">
+            <span>Your name for this case</span>
+            <input
+              id="custom-name"
+              type="text"
+              maxlength="40"
+              placeholder="e.g. headlights, sune fish, T"
+              autocomplete="off"
+            />
+          </label>
+          <p class="scramble-kicker" id="setup-kicker">Setup</p>
+          <pre id="setup" class="scramble"></pre>
           <div class="actions">
-            <button type="button" id="btn-next" class="pill primary">Next</button>
-            <button type="button" id="btn-reveal" class="pill">Reveal alg</button>
-            <button type="button" id="btn-known" class="pill" hidden>Mark known</button>
+            <button type="button" id="btn-next" class="pill primary" hidden>
+              Next
+            </button>
+            <button type="button" id="btn-reveal" class="pill">
+              Reveal solve
+            </button>
+            <button type="button" id="btn-practice" class="pill"></button>
           </div>
-          <div id="algs" class="algs" hidden></div>
+          <div id="solve-box" class="solve-box" hidden>
+            <p class="scramble-kicker">Solve</p>
+            <button type="button" id="solve-alg" class="alg"></button>
+          </div>
         </div>
       </section>
 
-      <section id="grid-wrap" class="grid-wrap">
+      <section id="grid-wrap" class="grid-wrap" hidden>
         <h2 id="grid-title">Cases</h2>
-        <p class="section-lead">
-          Click a case to deal it. Cycle unseen → learning → known for weighted
-          random.
-        </p>
+        <p class="section-lead" id="grid-lead"></p>
         <div id="grid" class="case-grid"></div>
       </section>
     </div>

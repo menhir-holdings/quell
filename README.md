@@ -1,17 +1,20 @@
 # Quell
 
-**2-look is done. Full CFOP from here.**
+Learn full OLL and PLL by practicing the cases you keep.
 
-3x3 drill trainer for moving off 2-look OLL/PLL. One case per deal: 3D cube, indicated hold (U/F colors), scramble, click-to-reveal step algs.
+Two lists: **Learn** (not in rotation yet) and **Practice** (the ones you are drilling). Name a case whatever helps you remember it — that name shows on the case screen and on the selection grid.
 
-### Modes
-- **OLL** — 57 cases. Default skips the 7 OCLLs you already 2-look.
-- **PLL** — 21 cases. Default skips EPLL + CPLL (Ua/Ub/H/Z + Aa/Ab/E).
-- **2-gen** — RU scramble from solved; F2L on R is broken. Reveal is the inverse (stay on R and U).
-- **Full** — WCA random-state scramble. No single-step alg.
-- **F2L** — cross done, 1–4 pairs left. Reveal is the first insertion.
+### Flow
+- **OLL / PLL** — last layer only.
+- **Learn** — pick a case, optional custom name, add it to practice.
+- **Practice → Feed** — endless random from your practice list.
+- **Practice → Select** — hit a specific case from the grid.
 
-Hold is color-neutral by default (one of 24 orientations, shown as U/F sticker colors). Space = next, R = reveal. Shift-click a case cell to cycle unseen → learning → known.
+Each case screen: your name, last-layer view (**Top** like SolveTheCube, or **3D** with floating hint stickers like scramble.cubing.net), the setup alg from the base state (solved for PLL, last layer oriented / F2L done for OLL), and a revealable solve alg.
+
+Algs follow [SolveTheCube](https://solvethecube.com/algorithms): easy to memoise and turn, built around sexy `(R U R' U')`, sledge `(R' F R F')`, and `(R U R' U)`.
+
+Progress lives in the browser (`localStorage`). Space = next in feed, R = reveal.
 
 ## Live
 
@@ -22,7 +25,8 @@ Hold is color-neutral by default (one of 24 orientations, shown as U/F sticker c
 
 | ID | Title | Status |
 |----|-------|--------|
-| [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 trainer — OLL/PLL/2-gen/F2L/full | In Progress |
+| [MT-193](https://linear.app/menhir-holdings/issue/MT-193) | OLL/PLL learn + practice UX | In Progress |
+| [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 trainer (superseded UX) | In Review |
 
 ## Develop
 
@@ -34,7 +38,7 @@ npm run dev
 ## Stack
 
 - Vite + TypeScript
-- `cubing` (TwistyPlayer + WCA scrambles) as an MPL library
+- `cubing` (TwistyPlayer) as an MPL library
 - Static alg data + localStorage progress
 
 ## License
