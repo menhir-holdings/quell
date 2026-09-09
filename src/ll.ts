@@ -129,14 +129,15 @@ function readLl(pattern: Pattern, solved: Pattern): LlStickers {
 const llCache = new Map<string, LlStickers>();
 let svgSeq = 0;
 
-export async function lastLayer(setupAlg: string): Promise<LlStickers> {
-  const hit = llCache.get(setupAlg);
+export async function lastLayer(moves: string): Promise<LlStickers> {
+  const key = moves.replace(/\s+/g, " ").trim();
+  const hit = llCache.get(key);
   if (hit) return hit;
   const kp = await kpuzzle();
   const solved = kp.defaultPattern().applyAlg("z2");
-  const pattern = kp.defaultPattern().applyAlg(`z2 ${setupAlg}`);
+  const pattern = kp.defaultPattern().applyAlg(key ? `z2 ${key}` : "z2");
   const ll = readLl(pattern, solved);
-  llCache.set(setupAlg, ll);
+  llCache.set(key, ll);
   return ll;
 }
 

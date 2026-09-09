@@ -6,15 +6,16 @@ Two lists: **Learn** (not in rotation yet) and **Practice** (the ones you are dr
 
 ### Flow
 - **OLL / PLL** — last layer only.
-- **Learn** — pick a case, optional custom name, mark it **Learned** to move it into practice.
-- **Practice → Feed** — endless random from your practice list.
-- **Practice → Select** — hit a specific case from the grid.
-
-Each case screen: your name, last-layer view (**Top** in SolveTheCube style — yellow vs grey for OLL, arrows for PLL — or **3D** with unused stickers greyed), the setup alg from the base state (solved for PLL, last layer oriented / F2L done for OLL), and a solve card you tap to reveal.
+- **Learn** — pick a case, optional custom name, mark it **Learned** to move it into practice. The next unlearned case stays where you were in the list.
+- **Practice** — one flow. Execute the alg from a known start (last layer oriented for OLL, solved for PLL). No get-to scramble.
+  - **Random / Pick** — how **Next** chooses. Persists until you change it. Tapping a grid cell jumps once and leaves that choice alone.
+  - **Chain** — keep the cube from the last alg and compound. Off = each round starts fresh.
+  - Tap the check card to see the end-state top view; tap again to play it in 3D.
+- **Menu** — reset every learned case back to Learn. Names stay.
 
 Algs follow [SolveTheCube](https://solvethecube.com/algorithms): easy to memoise and turn, built around sexy `(R U R' U')`, sledge `(R' F R F')`, and `(R U R' U)`.
 
-Progress lives in the browser (`localStorage`). Space = next in feed, R = reveal.
+Progress lives in the browser (`localStorage`). Space = next in Practice, R = reveal.
 
 ## Live
 
@@ -26,7 +27,8 @@ Progress lives in the browser (`localStorage`). Space = next in feed, R = reveal
 
 | ID | Title | Status |
 |----|-------|--------|
-| [MT-194](https://linear.app/menhir-holdings/issue/MT-194) | STC 2D, alg-card reveal, Learned | In progress |
+| [MT-195](https://linear.app/menhir-holdings/issue/MT-195) | Practice chaining, unified next | Done |
+| [MT-194](https://linear.app/menhir-holdings/issue/MT-194) | STC 2D, alg-card reveal, Learned | Done |
 | [MT-193](https://linear.app/menhir-holdings/issue/MT-193) | OLL/PLL learn + practice UX | Done |
 | [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 trainer (superseded UX) | Closed |
 

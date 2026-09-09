@@ -2,7 +2,7 @@ export type SetId = "oll" | "pll";
 
 export type Phase = "learn" | "practice";
 
-export type PracticeSub = "feed" | "select";
+export type NextMode = "random" | "pick";
 
 export type CubeView = "2d" | "3d";
 
@@ -39,6 +39,7 @@ export type CaseProgress = {
 export type Settings = {
   set: SetId;
   phase: Phase;
-  practiceSub: PracticeSub;
+  nextMode: NextMode;
+  chaining: boolean;
   view: CubeView;
 };
