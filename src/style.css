@@ -156,7 +156,7 @@ body {
 }
 
 .player-host {
-  height: 380px;
+  height: 420px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 8px;

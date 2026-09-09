@@ -54,19 +54,40 @@ const btnReveal = document.querySelector("#btn-reveal") as HTMLButtonElement;
 const btnPractice = document.querySelector("#btn-practice") as HTMLButtonElement;
 const playerHost = document.querySelector("#player-host") as HTMLElement;
 
-const player = new TwistyPlayer({
-  puzzle: "3x3x3",
-  visualization: "experimental-2D-LL",
-  background: "none",
-  controlPanel: "none",
-  hintFacelets: "none",
-  viewerLink: "none",
-  cameraLatitude: 35,
-  cameraLongitude: 25,
-});
-player.style.width = "100%";
-player.style.height = "100%";
-playerHost.append(player);
+let player: TwistyPlayer | null = null;
+
+function createPlayer(): TwistyPlayer {
+  const next = new TwistyPlayer({
+    puzzle: "3x3x3",
+    visualization: settings.view === "2d" ? "experimental-2D-LL" : "3D",
+    background: settings.view === "2d" ? "checkered" : "none",
+    controlPanel: "none",
+    hintFacelets: settings.view === "3d" ? "floating" : "none",
+    viewerLink: "none",
+    cameraLatitude: 35,
+    cameraLongitude: 25,
+  });
+  next.style.width = "100%";
+  next.style.height = "100%";
+  return next;
+}
+
+function remountPlayer(): TwistyPlayer {
+  player?.remove();
+  player = createPlayer();
+  playerHost.replaceChildren(player);
+  return player;
+}
+
+function applyAlgToPlayer(d: Deal, play = false): void {
+  const p = player ?? remountPlayer();
+  p.experimentalSetupAlg = `z2 ${d.setupAlg}`;
+  p.experimentalSetupAnchor = "start";
+  p.experimentalStickering = d.stickering;
+  p.alg = play ? d.solveAlg : "";
+  p.controlPanel = play ? "bottom-row" : "none";
+  if (play) p.play();
+}
 
 function tab(
   parent: HTMLElement,
@@ -86,14 +107,8 @@ function tab(
 }
 
 function applyView(): void {
-  const view: CubeView = settings.view;
-  if (view === "2d") {
-    player.visualization = "experimental-2D-LL";
-    player.hintFacelets = "none";
-  } else {
-    player.visualization = "3D";
-    player.hintFacelets = "floating";
-  }
+  remountPlayer();
+  if (current) applyAlgToPlayer(current);
 }
 
 function renderChrome(): void {
@@ -156,6 +171,7 @@ function renderChrome(): void {
     (id) => {
       settings.view = id as CubeView;
       saveSettings();
+      renderChrome();
       applyView();
     },
   );
@@ -194,12 +210,8 @@ function showDeal(d: Deal): void {
   const inPractice = getProgress(d.set, d.caseId).inPractice;
   btnPractice.textContent = inPractice ? "Remove from practice" : "Add to practice";
   btnNext.hidden = !(settings.phase === "practice" && settings.practiceSub === "feed");
-  applyView();
-  player.experimentalSetupAlg = `z2 ${d.setupAlg}`;
-  player.alg = "";
-  player.experimentalSetupAnchor = "start";
-  player.experimentalStickering = d.stickering;
-  player.controlPanel = "none";
+  remountPlayer();
+  applyAlgToPlayer(d);
   statusEl.textContent = d.displayName;
 }
 
@@ -215,11 +227,7 @@ function reveal(): void {
 
 function playSolve(): void {
   if (!current) return;
-  player.experimentalSetupAlg = `z2 ${current.setupAlg}`;
-  player.experimentalSetupAnchor = "start";
-  player.alg = current.solveAlg;
-  player.controlPanel = "bottom-row";
-  player.play();
+  applyAlgToPlayer(current, true);
 }
 
 function dealId(id: string): void {
