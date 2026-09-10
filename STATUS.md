@@ -1,7 +1,7 @@
 # Quell — Status
 
-**Version:** 0.4.0  
-**As of:** 2026-09-09  
+**Version:** 0.6.0  
+**As of:** 2026-09-10  
 **SoT:** [Linear — Quell](https://linear.app/menhir-holdings/project/quell-4c873f24ef7f)  
 **Checkout:** `Menhir Holdings/Game/Quell`
 
@@ -16,12 +16,14 @@
 
 ## Open
 
-None.
+- [MT-197](https://linear.app/menhir-holdings/issue/MT-197) — single chained flashcard + local accounts  
+  Branch: `ledoit/mt-197-single-chained-flashcard-local-accounts`
 
 ## Closed
 
 | Issue | What |
 |-------|------|
+| [MT-196](https://linear.app/menhir-holdings/issue/MT-196) | Learn unlearned chain states — superseded by MT-197, [PR #5](https://github.com/menhir-holdings/quell/pull/5) closed |
 | [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 multi-mode trainer — superseded, [PR #1](https://github.com/menhir-holdings/quell/pull/1) closed |
 
 ## Next
