@@ -1,33 +1,27 @@
 # Quell — Status
 
-**Version:** 0.7.0  
+**Version:** 0.7.1  
 **As of:** 2026-09-10  
 **SoT:** [Linear — Quell](https://linear.app/menhir-holdings/project/quell-4c873f24ef7f)  
 **Checkout:** `Menhir Holdings/Game/Quell`
 
-## Open
-
-- [MT-198](https://linear.app/menhir-holdings/issue/MT-198) — name in diagram, Change case, persist names, algo copy  
-  In Review once preview is up
-
 ## Shipped
 
-- [MT-197](https://linear.app/menhir-holdings/issue/MT-197) — single chained flashcard, local accounts, standalone PWA shell  
+- [MT-198](https://linear.app/menhir-holdings/issue/MT-198) — name in diagram, Change case, persist names, canonical labels, frozen alg/check heights  
   Live: **https://quellcube.vercel.app**  
-  [PR #6](https://github.com/menhir-holdings/quell/pull/6)
-- [MT-195](https://linear.app/menhir-holdings/issue/MT-195) — unified Practice, chaining, hamburger reset, Learn continues in place  
+  [PR #7](https://github.com/menhir-holdings/quell/pull/7)
+- [MT-197](https://linear.app/menhir-holdings/issue/MT-197) — single chained flashcard, local accounts, standalone PWA shell  
   Live: **https://quellcube.vercel.app**
-- [MT-194](https://linear.app/menhir-holdings/issue/MT-194) — STC 2D diagrams, reveal on the alg card, Learned, restyle  
-  [PR #3](https://github.com/menhir-holdings/quell/pull/3)
-- [MT-193](https://linear.app/menhir-holdings/issue/MT-193) — OLL/PLL learn + practice trainer  
-  [PR #2](https://github.com/menhir-holdings/quell/pull/2)
+- [MT-195](https://linear.app/menhir-holdings/issue/MT-195) — unified Practice, chaining, hamburger reset, Learn continues in place
+- [MT-194](https://linear.app/menhir-holdings/issue/MT-194) — STC 2D diagrams, reveal on the alg card, Learned, restyle
+- [MT-193](https://linear.app/menhir-holdings/issue/MT-193) — OLL/PLL learn + practice trainer
 
 ## Closed
 
 | Issue | What |
 |-------|------|
-| [MT-196](https://linear.app/menhir-holdings/issue/MT-196) | Learn unlearned chain states — superseded by MT-197, [PR #5](https://github.com/menhir-holdings/quell/pull/5) closed |
-| [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 multi-mode trainer — superseded, [PR #1](https://github.com/menhir-holdings/quell/pull/1) closed |
+| [MT-196](https://linear.app/menhir-holdings/issue/MT-196) | Learn unlearned chain states — superseded by MT-197 |
+| [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 multi-mode trainer — superseded |
 
 ## Next
 
