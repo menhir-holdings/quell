@@ -6,10 +6,10 @@ Two lists: **Learn** (not in rotation yet) and **Practice** (the ones you are dr
 
 ### Flow
 - **OLL / PLL** — last layer only.
-- **Learn** — pick a case, optional custom name, mark it **Learned** to move it into practice. The next unlearned case stays where you were in the list.
+- **Learn** — pick a case, give it a name, then **Learned** moves it into practice. The next unlearned case stays where you were in the list.
 - **Practice** — one flow. Execute the alg from a known start (last layer oriented for OLL, solved for PLL). No get-to scramble.
   - **Random / Pick** — how **Next** chooses. Persists until you change it. Tapping a grid cell jumps once and leaves that choice alone.
-  - **Chain** — keep the cube from the last alg and compound. Off = each round starts fresh.
+  - **Chain** — keep the cube from the last alg and compound. Off = each round starts fresh. If the cube lands on a case you have not learned, name it and mark **Learned** to keep the solve back to finished.
   - Tap the check card to see the end-state top view; tap again to play it in 3D.
 - **Menu** — reset every learned case back to Learn. Names stay.
 
@@ -27,6 +27,7 @@ Progress lives in the browser (`localStorage`). Space = next in Practice, R = re
 
 | ID | Title | Status |
 |----|-------|--------|
+| [MT-196](https://linear.app/menhir-holdings/issue/MT-196) | Learn unlearned chain states, require names | In progress |
 | [MT-195](https://linear.app/menhir-holdings/issue/MT-195) | Practice chaining, unified next | Done |
 | [MT-194](https://linear.app/menhir-holdings/issue/MT-194) | STC 2D, alg-card reveal, Learned | Done |
 | [MT-193](https://linear.app/menhir-holdings/issue/MT-193) | OLL/PLL learn + practice UX | Done |

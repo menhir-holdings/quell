@@ -141,6 +141,15 @@ export async function lastLayer(moves: string): Promise<LlStickers> {
   return ll;
 }
 
+/** Orientation (OLL) or sticker colors (PLL), including AUF-sensitive sides. */
+export function llKey(ll: LlStickers, set: SetId): string {
+  if (set === "oll") {
+    const bit = (hue: Hue) => (hue === "Y" ? "Y" : "-");
+    return [...ll.u, ...ll.f, ...ll.r, ...ll.b, ...ll.l].map(bit).join("");
+  }
+  return [...ll.u, ...ll.f, ...ll.r, ...ll.b, ...ll.l].join("");
+}
+
 function fill(hue: Hue, set: SetId): string {
   if (set === "oll") return hue === "Y" ? PAINT.Y : GRAY;
   return PAINT[hue];

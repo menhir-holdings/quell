@@ -1,5 +1,6 @@
 import { TwistyPlayer } from "cubing/twisty";
 import { casesFor, dealCase, joinAlgs, nextInOrder, pickRandom } from "./deal";
+import { identifyMoves } from "./identify";
 import { llMarkup } from "./ll";
 import { displayName, getProgress, resetLearned, setProgress } from "./progress";
 import type { CaseDef, CubeView, Deal, NextMode, Phase, SetId, Settings } from "./types";
@@ -53,6 +54,8 @@ let revealed = false;
 let chain = "";
 let chainCount = 0;
 let revealGen = 0;
+let foundGen = 0;
+let foundEntry: CaseDef | null = null;
 
 const setsEl = document.querySelector("#sets") as HTMLElement;
 const phasesEl = document.querySelector("#phases") as HTMLElement;
@@ -77,6 +80,14 @@ const gridTitle = document.querySelector("#grid-title") as HTMLElement;
 const gridLead = document.querySelector("#grid-lead") as HTMLElement;
 const btnNext = document.querySelector("#btn-next") as HTMLButtonElement;
 const btnLearned = document.querySelector("#btn-learned") as HTMLButtonElement;
+const learnHint = document.querySelector("#learn-hint") as HTMLElement;
+const foundCard = document.querySelector("#found-card") as HTMLElement;
+const foundTitle = document.querySelector("#found-title") as HTMLElement;
+const foundSub = document.querySelector("#found-sub") as HTMLElement;
+const foundAlg = document.querySelector("#found-alg") as HTMLElement;
+const foundName = document.querySelector("#found-name") as HTMLInputElement;
+const foundHint = document.querySelector("#found-hint") as HTMLElement;
+const btnLearnFound = document.querySelector("#btn-learn-found") as HTMLButtonElement;
 const llDiagram = document.querySelector("#ll-diagram") as HTMLElement;
 const playerHost = document.querySelector("#player-host") as HTMLElement;
 const btnMenu = document.querySelector("#btn-menu") as HTMLButtonElement;
@@ -293,6 +304,54 @@ function paintStatus(): void {
   statusEl.textContent = `Practice · ${chainBit}`;
 }
 
+function named(value: string): boolean {
+  return value.trim().length > 0;
+}
+
+function hideFound(): void {
+  foundEntry = null;
+  foundCard.hidden = true;
+}
+
+function paintFoundLearned(): void {
+  const ready = named(foundName.value);
+  btnLearnFound.disabled = !ready;
+  foundHint.hidden = ready;
+}
+
+function showFound(entry: CaseDef): void {
+  foundEntry = entry;
+  const deal = dealCase(settings.set, entry);
+  foundCard.hidden = false;
+  foundTitle.textContent = deal.canonicalName;
+  foundSub.textContent = deal.group;
+  foundAlg.textContent = deal.solveAlg;
+  foundName.value = getProgress(settings.set, entry.id).name;
+  paintFoundLearned();
+}
+
+async function updateFound(): Promise<void> {
+  const gen = ++foundGen;
+  if (!current || settings.phase !== "practice" || !settings.chaining) {
+    hideFound();
+    return;
+  }
+  const moves = revealed
+    ? joinAlgs(runningMoves(), current.solveAlg)
+    : runningMoves();
+  if (!moves) {
+    hideFound();
+    return;
+  }
+  const hit = await identifyMoves(moves, current.set);
+  if (gen !== foundGen) return;
+  if (hit.kind !== "case" || getProgress(current.set, hit.entry.id).inPractice) {
+    hideFound();
+    return;
+  }
+  showFound(hit.entry);
+}
+
 function paintSolveCard(): void {
   solveCard.setAttribute("aria-expanded", revealed ? "true" : "false");
   if (settings.phase === "learn") {
@@ -316,13 +375,19 @@ function paintSolveCard(): void {
     if (gen !== revealGen || current?.caseId !== d.caseId || !revealed) return;
     solveBody.innerHTML = `${svg}<span class="solve-hint">Tap to play</span>`;
   });
+  void updateFound();
 }
 
 function paintLearned(): void {
+  const practicing = settings.phase === "practice";
   const on = Boolean(current && getProgress(current.set, current.caseId).inPractice);
-  btnLearned.hidden = settings.phase === "practice";
+  const ready = named(nameInput.value);
+  btnLearned.hidden = practicing;
+  learnHint.hidden = practicing || ready;
+  btnLearned.disabled = practicing || !ready;
   btnLearned.setAttribute("aria-pressed", on ? "true" : "false");
   btnLearned.textContent = "Learned";
+  nameInput.required = !practicing;
 }
 
 async function paintDiagram(d: Deal): Promise<void> {
@@ -333,6 +398,7 @@ function showDeal(d: Deal): void {
   current = d;
   revealed = false;
   revealGen += 1;
+  hideFound();
   stageEl.hidden = false;
   const practicing = settings.phase === "practice";
   caseEl.textContent = practicing ? `Do ${d.displayName}` : d.displayName;
@@ -348,6 +414,7 @@ function showDeal(d: Deal): void {
   setupEl.textContent = d.setupAlg;
   paintSolveCard();
   paintLearned();
+  void updateFound();
   btnNext.hidden = !practicing;
   showView();
   void paintDiagram(d);
@@ -362,6 +429,7 @@ function reveal(): void {
   if (!current || revealed) return;
   revealed = true;
   paintSolveCard();
+  void updateFound();
 }
 
 function playSolve(): void {
@@ -448,6 +516,22 @@ function paintGridHighlight(): void {
   }
 }
 
+async function refreshPracticeGrid(): Promise<void> {
+  const pool = practicedCases();
+  if (!pool.length) {
+    void renderAll();
+    return;
+  }
+  await renderGrid(
+    pool,
+    `Practice ${settings.set.toUpperCase()}`,
+    settings.nextMode === "random"
+      ? "Next picks at random. Tap a case to jump without changing that."
+      : "Next walks the list. Tap a case to jump without changing that.",
+  );
+  paintStatus();
+}
+
 let renderGen = 0;
 
 function keepCurrent(pool: CaseDef[]): boolean {
@@ -459,6 +543,7 @@ function keepCurrent(pool: CaseDef[]): boolean {
 async function renderAll(): Promise<void> {
   const gen = ++renderGen;
   renderChrome();
+  hideFound();
   emptyEl.hidden = true;
   emptyEl.textContent = "";
   gridWrap.hidden = true;
@@ -482,7 +567,7 @@ async function renderAll(): Promise<void> {
     await renderGrid(
       pool,
       `Learn ${setLabel}`,
-      "Tap the solve card for the alg. Learned moves it into practice.",
+      "Name the case, then Learned moves it into practice.",
     );
     paintStatus();
     return;
@@ -530,6 +615,14 @@ nameInput.addEventListener("input", () => {
     `.case-cell[data-id="${current.caseId}"] .cell-name`,
   );
   if (cell) cell.textContent = current.displayName;
+  paintLearned();
+});
+
+foundName.addEventListener("input", () => {
+  if (foundEntry) {
+    setProgress(settings.set, foundEntry.id, { name: foundName.value });
+  }
+  paintFoundLearned();
 });
 
 btnNext.addEventListener("click", () => nextPractice(true));
@@ -538,10 +631,13 @@ solveCard.addEventListener("click", () => {
   else playSolve();
 });
 btnLearned.addEventListener("click", () => {
-  if (!current || settings.phase !== "learn") return;
+  if (!current || settings.phase !== "learn" || !named(nameInput.value)) return;
   const pool = learnCases();
   const idx = pool.findIndex((entry) => entry.id === current!.caseId);
-  setProgress(current.set, current.caseId, { inPractice: true });
+  setProgress(current.set, current.caseId, {
+    name: nameInput.value.trim(),
+    inPractice: true,
+  });
   const rest = learnCases();
   if (!rest.length) {
     current = null;
@@ -551,6 +647,15 @@ btnLearned.addEventListener("click", () => {
   const next = rest[Math.min(Math.max(idx, 0), rest.length - 1)];
   dealId(next.id);
   void renderAll();
+});
+btnLearnFound.addEventListener("click", () => {
+  if (!foundEntry || !named(foundName.value)) return;
+  setProgress(settings.set, foundEntry.id, {
+    name: foundName.value.trim(),
+    inPractice: true,
+  });
+  hideFound();
+  void refreshPracticeGrid();
 });
 
 btnMenu.addEventListener("click", (ev) => {

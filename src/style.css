@@ -256,6 +256,37 @@ body {
   border-color: #b7dbc8;
 }
 
+.learned:disabled {
+  background: var(--card);
+  color: var(--muted);
+  border-color: var(--line);
+  cursor: not-allowed;
+  opacity: 1;
+}
+
+.field-hint {
+  color: var(--muted);
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+.found-card {
+  background: var(--learned-dim);
+  border: 1px solid #b7dbc8;
+  border-radius: var(--radius);
+  padding: 1rem 1.05rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.found-title {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
 .filters {
   display: flex;
   flex-wrap: wrap;

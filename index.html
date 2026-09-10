@@ -79,8 +79,10 @@
               maxlength="40"
               placeholder="e.g. headlights, sune fish, T"
               autocomplete="off"
+              aria-describedby="learn-hint"
             />
           </label>
+          <p id="learn-hint" class="field-hint" hidden>Name this case to mark it Learned.</p>
           <div id="setup-block">
             <p class="scramble-kicker" id="setup-kicker">Setup</p>
             <pre id="setup" class="scramble"></pre>
@@ -89,6 +91,28 @@
             <span class="solve-kicker" id="solve-kicker">Solve</span>
             <span id="solve-body" class="solve-body">Tap to reveal</span>
           </button>
+          <aside id="found-card" class="found-card" hidden>
+            <p class="solve-kicker">Not in practice yet</p>
+            <p id="found-title" class="found-title"></p>
+            <p id="found-sub" class="case-sub"></p>
+            <p class="practice-prompt">Solve this cube back to finished.</p>
+            <pre id="found-alg" class="scramble"></pre>
+            <label class="name-field">
+              <span>Your name for this case</span>
+              <input
+                id="found-name"
+                type="text"
+                maxlength="40"
+                placeholder="e.g. headlights, sune fish, T"
+                autocomplete="off"
+                aria-describedby="found-hint"
+              />
+            </label>
+            <p id="found-hint" class="field-hint">Name it to mark Learned.</p>
+            <button type="button" id="btn-learn-found" class="learned" disabled>
+              Learned
+            </button>
+          </aside>
           <div class="actions">
             <button type="button" id="btn-next" class="pill primary" hidden>
               Next

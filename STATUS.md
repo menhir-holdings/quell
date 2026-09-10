@@ -1,7 +1,7 @@
 # Quell — Status
 
-**Version:** 0.4.0  
-**As of:** 2026-09-09  
+**Version:** 0.5.0  
+**As of:** 2026-09-10  
 **SoT:** [Linear — Quell](https://linear.app/menhir-holdings/project/quell-4c873f24ef7f)  
 **Checkout:** `Menhir Holdings/Game/Quell`
 
@@ -16,7 +16,8 @@
 
 ## Open
 
-None.
+- [MT-196](https://linear.app/menhir-holdings/issue/MT-196) — learn unlearned chain states; name required before Learned  
+  Branch: `ledoit/mt-196-learn-unlearned-chain-states-require-names`
 
 ## Closed
 
