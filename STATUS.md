@@ -1,13 +1,16 @@
 # Quell — Status
 
-**Version:** 0.7.1  
+**Version:** 0.7.2  
 **As of:** 2026-09-10  
 **SoT:** [Linear — Quell](https://linear.app/menhir-holdings/project/quell-4c873f24ef7f)  
 **Checkout:** `Menhir Holdings/Game/Quell`
 
 ## Shipped
 
-- [MT-198](https://linear.app/menhir-holdings/issue/MT-198) — name in diagram, Change case, persist names, canonical labels, frozen alg/check heights  
+- [MT-200](https://linear.app/menhir-holdings/issue/MT-200) — Change sheet hidden when closed, floating picker, cube reserved without empty cards  
+  Live: **https://quellcube.vercel.app**  
+  [PR #8](https://github.com/menhir-holdings/quell/pull/8)
+- [MT-198](https://linear.app/menhir-holdings/issue/MT-198) — name in diagram, Change case, persist names, canonical labels  
   Live: **https://quellcube.vercel.app**  
   [PR #7](https://github.com/menhir-holdings/quell/pull/7)
 - [MT-197](https://linear.app/menhir-holdings/issue/MT-197) — single chained flashcard, local accounts, standalone PWA shell  
