@@ -1,8 +1,12 @@
 import type { Account, CaseRecord, SetId, Vault } from "./types";
 
 const VAULT_KEY = "quell.vault.v1";
+const VAULT_STABLE = "quell.vault";
 const LEGACY_PROGRESS = "quell.progress.v2";
 const LEGACY_PROGRESS_V1 = "quell.progress.v1";
+const IDB_NAME = "quell";
+const IDB_STORE = "kv";
+const IDB_ENTRY = "vault";
 
 function uid(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -32,6 +36,51 @@ function makeAccount(label: string, cases: Account["cases"] = emptyCases()): Acc
     createdAt: Date.now(),
     cases,
   };
+}
+
+function later(a: number | null, b: number | null): number | null {
+  if (a == null) return b;
+  if (b == null) return a;
+  return Math.max(a, b);
+}
+
+function mergeRecord(a: CaseRecord, b: CaseRecord): CaseRecord {
+  const aName = a.name.trim();
+  const bName = b.name.trim();
+  const name =
+    aName && bName
+      ? (a.namedAt ?? 0) >= (b.namedAt ?? 0)
+        ? aName
+        : bName
+      : aName || bName;
+  const namedAt = name
+    ? name === aName
+      ? (a.namedAt ?? b.namedAt)
+      : (b.namedAt ?? a.namedAt)
+    : null;
+  return {
+    name,
+    seen: Math.max(a.seen, b.seen),
+    revealed: Math.max(a.revealed, b.revealed),
+    lastSeenAt: later(a.lastSeenAt, b.lastSeenAt),
+    namedAt,
+  };
+}
+
+function mergeCasesInto(dst: Account["cases"], src: Account["cases"]): boolean {
+  let changed = false;
+  for (const set of ["oll", "pll"] as const) {
+    dst[set] ??= {};
+    for (const [id, rec] of Object.entries(src[set] ?? {})) {
+      const prev = dst[set][id] ?? emptyRecord();
+      const next = mergeRecord(prev, rec);
+      if (JSON.stringify(prev) !== JSON.stringify(next)) {
+        dst[set][id] = next;
+        changed = true;
+      }
+    }
+  }
+  return changed;
 }
 
 function namesToCases(
@@ -71,46 +120,102 @@ function migrateProgressV2(raw: string): Account["cases"] {
   }
 }
 
-function migrateProgressV1(raw: string): Account["cases"] {
+function parseVault(raw: string | null): Vault | null {
+  if (!raw) return null;
   try {
-    JSON.parse(raw);
-    return emptyCases();
+    const parsed = JSON.parse(raw) as Vault;
+    if (parsed.version === 1 && parsed.accounts?.length && parsed.currentId) {
+      const current = parsed.accounts.find((a) => a.id === parsed.currentId);
+      if (current) return parsed;
+      return { ...parsed, currentId: parsed.accounts[0].id };
+    }
   } catch {
-    return emptyCases();
+    /* ignore */
   }
+  return null;
+}
+
+function namedCount(cases: Account["cases"]): number {
+  let n = 0;
+  for (const set of ["oll", "pll"] as const) {
+    for (const rec of Object.values(cases[set] ?? {})) {
+      if (rec.name.trim()) n += 1;
+    }
+  }
+  return n;
+}
+
+function mergeVaultByAccount(into: Vault, extra: Vault | null): boolean {
+  if (!extra) return false;
+  let changed = false;
+  const byId = new Map(extra.accounts.map((a) => [a.id, a]));
+  for (const acc of into.accounts) {
+    const other = byId.get(acc.id);
+    if (other) changed = mergeCasesInto(acc.cases, other.cases) || changed;
+  }
+  return changed;
+}
+
+function absorbNames(vault: Vault): boolean {
+  let changed = mergeVaultByAccount(
+    vault,
+    parseVault(localStorage.getItem(VAULT_STABLE)),
+  );
+  changed = mergeVaultByAccount(vault, parseVault(localStorage.getItem(VAULT_KEY))) || changed;
+  const acc = vault.accounts.find((a) => a.id === vault.currentId) ?? vault.accounts[0];
+  if (namedCount(acc.cases) === 0) {
+    const legacy = emptyCases();
+    mergeCasesInto(legacy, migrateProgressV2(localStorage.getItem(LEGACY_PROGRESS) ?? ""));
+    mergeCasesInto(legacy, migrateProgressV2(localStorage.getItem(LEGACY_PROGRESS_V1) ?? ""));
+    if (namedCount(legacy) > 0) changed = mergeCasesInto(acc.cases, legacy) || changed;
+  }
+  return changed;
 }
 
 function seedVault(): Vault {
-  let cases = emptyCases();
-  const v2 = localStorage.getItem(LEGACY_PROGRESS);
-  const v1 = localStorage.getItem(LEGACY_PROGRESS_V1);
-  if (v2) cases = migrateProgressV2(v2);
-  else if (v1) cases = migrateProgressV1(v1);
+  const cases = emptyCases();
+  mergeCasesInto(cases, migrateProgressV2(localStorage.getItem(LEGACY_PROGRESS) ?? ""));
+  mergeCasesInto(cases, migrateProgressV2(localStorage.getItem(LEGACY_PROGRESS_V1) ?? ""));
   const account = makeAccount("You", cases);
   return { version: 1, currentId: account.id, accounts: [account] };
 }
 
-function loadVault(): Vault {
+function persistIdb(vault: Vault): void {
+  if (typeof indexedDB === "undefined") return;
   try {
-    const raw = localStorage.getItem(VAULT_KEY);
-    if (raw) {
-      const parsed = JSON.parse(raw) as Vault;
-      if (parsed.version === 1 && parsed.accounts?.length && parsed.currentId) {
-        const current = parsed.accounts.find((a) => a.id === parsed.currentId);
-        if (current) return parsed;
-        return { ...parsed, currentId: parsed.accounts[0].id };
-      }
-    }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+    };
+    req.onsuccess = () => {
+      const db = req.result;
+      const tx = db.transaction(IDB_STORE, "readwrite");
+      tx.objectStore(IDB_STORE).put(vault, IDB_ENTRY);
+      tx.oncomplete = () => db.close();
+    };
   } catch {
-    /* seed */
+    /* private mode */
   }
-  const seeded = seedVault();
-  saveVault(seeded);
-  return seeded;
 }
 
 function saveVault(vault: Vault): void {
-  localStorage.setItem(VAULT_KEY, JSON.stringify(vault));
+  const raw = JSON.stringify(vault);
+  localStorage.setItem(VAULT_KEY, raw);
+  localStorage.setItem(VAULT_STABLE, raw);
+  persistIdb(vault);
+}
+
+function loadVault(): Vault {
+  const existing =
+    parseVault(localStorage.getItem(VAULT_STABLE)) ??
+    parseVault(localStorage.getItem(VAULT_KEY));
+  const vault = existing ?? seedVault();
+  const changed = absorbNames(vault);
+  if (!existing || changed || !localStorage.getItem(VAULT_STABLE) || !localStorage.getItem(VAULT_KEY)) {
+    saveVault(vault);
+  }
+  return vault;
 }
 
 function mutate(fn: (vault: Vault) => void): Vault {
@@ -118,6 +223,50 @@ function mutate(fn: (vault: Vault) => void): Vault {
   fn(vault);
   saveVault(vault);
   return vault;
+}
+
+export function hydrateVault(): Promise<void> {
+  if (typeof indexedDB === "undefined") return Promise.resolve();
+  return new Promise((resolve) => {
+    const finish = (): void => resolve();
+    try {
+      const req = indexedDB.open(IDB_NAME, 1);
+      req.onerror = finish;
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains(IDB_STORE)) db.createObjectStore(IDB_STORE);
+      };
+      req.onsuccess = () => {
+        const db = req.result;
+        const tx = db.transaction(IDB_STORE, "readonly");
+        const get = tx.objectStore(IDB_STORE).get(IDB_ENTRY);
+        get.onerror = () => {
+          db.close();
+          finish();
+        };
+        get.onsuccess = () => {
+          const extra = get.result
+            ? parseVault(JSON.stringify(get.result))
+            : null;
+          db.close();
+          if (extra) {
+            mutate((v) => {
+              mergeVaultByAccount(v, extra);
+              const ours = v.accounts.find((a) => a.id === v.currentId) ?? v.accounts[0];
+              if (namedCount(ours.cases) === 0) {
+                const donor =
+                  extra.accounts.find((a) => a.id === extra.currentId) ?? extra.accounts[0];
+                mergeCasesInto(ours.cases, donor.cases);
+              }
+            });
+          }
+          finish();
+        };
+      };
+    } catch {
+      finish();
+    }
+  });
 }
 
 export function listAccounts(): Account[] {

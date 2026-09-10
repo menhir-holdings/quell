@@ -1,11 +1,18 @@
 import { Alg } from "cubing/alg";
-import { OLL } from "./data/oll";
-import { PLL } from "./data/pll";
+import { OLL, OLL_GROUPS } from "./data/oll";
+import { PLL, PLL_GROUPS } from "./data/pll";
 import { caseName } from "./account";
 import type { CaseDef, Deal, SetId } from "./types";
 
 export function casesFor(set: SetId): CaseDef[] {
   return set === "oll" ? OLL : PLL;
+}
+
+export function casesGrouped(set: SetId): CaseDef[] {
+  const pool = casesFor(set);
+  const order = set === "oll" ? OLL_GROUPS : PLL_GROUPS;
+  const rank = new Map(order.map((group, i) => [group, i]));
+  return [...pool].sort((a, b) => (rank.get(a.group) ?? 99) - (rank.get(b.group) ?? 99));
 }
 
 export function findCase(set: SetId, id: string): CaseDef | undefined {
