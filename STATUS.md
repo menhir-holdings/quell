@@ -1,6 +1,6 @@
 # Quell — Status
 
-**Version:** 0.7.2  
+**Version:** 0.7.3  
 **As of:** 2026-09-10  
 **SoT:** [Linear — Quell](https://linear.app/menhir-holdings/project/quell-4c873f24ef7f)  
 **Checkout:** `Menhir Holdings/Game/Quell`

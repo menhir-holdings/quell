@@ -56,6 +56,8 @@ let chain = "";
 let recent: string[] = [];
 let checkGen = 0;
 let editingName = false;
+let namePrompt: { set: SetId; id: string; token: number } | null = null;
+let namePromptToken = 0;
 
 const appEl = document.querySelector("#app") as HTMLElement;
 const stageEl = document.querySelector("#stage") as HTMLElement;
@@ -314,9 +316,33 @@ function startNameEdit(): void {
   nameEl.hidden = true;
   nameEdit.hidden = false;
   nameEdit.value = custom;
-  nameEdit.placeholder = current.canonicalName;
+  nameEdit.placeholder = "";
   nameEdit.focus();
   if (named(custom)) nameEdit.select();
+}
+
+function caseIsNamed(set: SetId, id: string): boolean {
+  return named(caseName(set, id));
+}
+
+function promptForName(): void {
+  if (!current || nameDialog.open) return;
+  const token = ++namePromptToken;
+  const target = { set: current.set, id: current.caseId, token };
+  namePrompt = target;
+  nameDialogInput.value = "";
+  btnSaveName.disabled = true;
+  nameDialog.returnValue = "";
+  requestAnimationFrame(() => {
+    if (namePrompt?.token !== token) return;
+    if (caseIsNamed(target.set, target.id)) {
+      namePrompt = null;
+      advance();
+      return;
+    }
+    nameDialog.showModal();
+    nameDialogInput.focus();
+  });
 }
 
 function paintName(): void {
@@ -361,6 +387,10 @@ function paintCheck(): void {
 
 function showDeal(d: Deal): void {
   stopNameEdit(false);
+  if (nameDialog.open) {
+    namePrompt = null;
+    nameDialog.close("cancel");
+  }
   current = d;
   algOpen = false;
   checkOpen = false;
@@ -544,12 +574,8 @@ function requestNext(): void {
     dealFresh();
     return;
   }
-  if (!named(caseName(current.set, current.caseId))) {
-    nameDialogInput.value = "";
-    btnSaveName.disabled = true;
-    nameDialog.returnValue = "";
-    nameDialog.showModal();
-    nameDialogInput.focus();
+  if (!caseIsNamed(current.set, current.caseId)) {
+    promptForName();
     return;
   }
   advance();
@@ -603,12 +629,20 @@ nameDialogInput.addEventListener("input", () => {
   btnSaveName.disabled = !named(nameDialogInput.value);
 });
 nameDialog.addEventListener("close", () => {
-  if (nameDialog.returnValue !== "save" || !current || !named(nameDialogInput.value)) {
-    return;
+  const prompt = namePrompt;
+  namePrompt = null;
+  const save = nameDialog.returnValue === "save";
+  const text = nameDialogInput.value;
+  nameDialog.returnValue = "";
+  nameDialogInput.value = "";
+  btnSaveName.disabled = true;
+  if (!save || !prompt || !named(text)) return;
+  setCaseName(prompt.set, prompt.id, text);
+  if (current?.set === prompt.set && current.caseId === prompt.id) {
+    current.displayName = caseName(prompt.set, prompt.id);
+    paintName();
+    advance();
   }
-  setCaseName(current.set, current.caseId, nameDialogInput.value);
-  current.displayName = caseName(current.set, current.caseId);
-  advance();
 });
 
 accountDialogInput.addEventListener("input", () => {
