@@ -3,9 +3,11 @@ import {
   caseName,
   createAccount,
   currentAccount,
+  deleteAccount,
   listAccounts,
   markRevealed,
   markShown,
+  renameAccount,
   setCaseName,
   switchAccount,
 } from "./account";
@@ -55,6 +57,8 @@ let recent: string[] = [];
 let checkGen = 0;
 let editingName = false;
 
+const appEl = document.querySelector("#app") as HTMLElement;
+const stageEl = document.querySelector("#stage") as HTMLElement;
 const setsEl = document.querySelector("#sets") as HTMLElement;
 const viewTabsEl = document.querySelector("#view-tabs") as HTMLElement;
 const statusEl = document.querySelector("#status") as HTMLElement;
@@ -78,6 +82,13 @@ const accountDialogInput = document.querySelector(
   "#account-dialog-input",
 ) as HTMLInputElement;
 const btnSaveAccount = document.querySelector("#btn-save-account") as HTMLButtonElement;
+const accountPage = document.querySelector("#account-page") as HTMLElement;
+const accountBack = document.querySelector("#account-back") as HTMLButtonElement;
+const accountName = document.querySelector("#account-name") as HTMLInputElement;
+const btnDeleteAccount = document.querySelector("#btn-delete-account") as HTMLButtonElement;
+const deleteDialog = document.querySelector("#delete-dialog") as HTMLDialogElement;
+const deleteTitle = document.querySelector("#delete-title") as HTMLElement;
+const deleteCopy = document.querySelector("#delete-copy") as HTMLElement;
 
 let player: TwistyPlayer | null = null;
 
@@ -147,7 +158,9 @@ function tab(
   for (const item of items) {
     const button = document.createElement("button");
     button.type = "button";
+    button.dataset.id = item.id;
     button.className = "mode-tab" + (item.id === active ? " active" : "");
+    button.setAttribute("aria-pressed", item.id === active ? "true" : "false");
     button.textContent = item.label;
     button.addEventListener("click", () => onPick(item.id));
     parent.append(button);
@@ -157,6 +170,53 @@ function tab(
 function closeMenu(): void {
   menuEl.hidden = true;
   btnMenu.setAttribute("aria-expanded", "false");
+}
+
+function openAccountPage(): void {
+  commitName();
+  const account = currentAccount();
+  accountName.value = account.label;
+  appEl.dataset.surface = "account";
+  stageEl.hidden = true;
+  accountPage.hidden = false;
+  accountName.focus();
+  accountName.select();
+}
+
+function closeAccountPage(save = true): void {
+  if (save && !accountPage.hidden) commitAccountLabel();
+  delete appEl.dataset.surface;
+  accountPage.hidden = true;
+  stageEl.hidden = false;
+}
+
+function commitAccountLabel(): void {
+  const next = accountName.value;
+  if (!named(next)) {
+    accountName.value = currentAccount().label;
+    return;
+  }
+  renameAccount(currentAccount().id, next);
+}
+
+function promptDeleteAccount(): void {
+  const account = currentAccount();
+  deleteTitle.textContent = `Delete ${account.label}?`;
+  deleteCopy.textContent =
+    "Case names on this account go with it. This cannot be undone.";
+  deleteDialog.returnValue = "";
+  deleteDialog.showModal();
+}
+
+function confirmDeleteAccount(): void {
+  deleteAccount(currentAccount().id);
+  closeAccountPage(false);
+  resetChain();
+  dealFresh();
+}
+
+function dialogOpen(): boolean {
+  return nameDialog.open || accountDialog.open || deleteDialog.open;
 }
 
 function renderAccounts(): void {
@@ -169,14 +229,20 @@ function renderAccounts(): void {
     button.role = "menuitem";
     button.className = "menu-account" + (account.id === activeId ? " current" : "");
     button.textContent = account.label;
-    if (account.id === activeId) button.setAttribute("aria-current", "true");
+    if (account.id === activeId) {
+      button.setAttribute("aria-current", "true");
+      button.setAttribute("aria-label", `${account.label}, account details`);
+    }
     button.addEventListener("click", () => {
-      if (account.id !== activeId) {
-        switchAccount(account.id);
-        resetChain();
-        dealFresh();
-      }
       closeMenu();
+      if (account.id === activeId) {
+        openAccountPage();
+        return;
+      }
+      switchAccount(account.id);
+      resetChain();
+      closeAccountPage(false);
+      dealFresh();
     });
     accountList.append(button);
   }
@@ -195,9 +261,11 @@ function renderChrome(): void {
     ],
     settings.set,
     (id) => {
+      if (id === settings.set) return;
       settings.set = id as SetId;
       saveSettings();
       resetChain();
+      renderChrome();
       dealFresh();
     },
   );
@@ -424,6 +492,7 @@ accountDialog.addEventListener("close", () => {
   if (accountDialog.returnValue !== "save" || !named(accountDialogInput.value)) return;
   createAccount(accountDialogInput.value);
   resetChain();
+  closeAccountPage(false);
   dealFresh();
 });
 
@@ -442,6 +511,26 @@ btnNewAccount.addEventListener("click", () => {
   accountDialog.showModal();
   accountDialogInput.focus();
 });
+accountBack.addEventListener("click", () => closeAccountPage());
+accountName.addEventListener("input", () => {
+  if (!named(accountName.value)) return;
+  renameAccount(currentAccount().id, accountName.value);
+});
+accountName.addEventListener("blur", () => commitAccountLabel());
+accountName.addEventListener("keydown", (ev) => {
+  if (ev.key === "Enter") {
+    ev.preventDefault();
+    closeAccountPage();
+  }
+});
+btnDeleteAccount.addEventListener("click", () => promptDeleteAccount());
+deleteDialog.addEventListener("close", () => {
+  if (deleteDialog.returnValue !== "delete") return;
+  confirmDeleteAccount();
+});
+for (const btn of document.querySelectorAll<HTMLButtonElement>(".dialog-cancel")) {
+  btn.addEventListener("click", () => btn.closest("dialog")?.close("cancel"));
+}
 document.addEventListener("click", () => closeMenu());
 menuEl.addEventListener("click", (ev) => ev.stopPropagation());
 
@@ -451,7 +540,9 @@ window.addEventListener("keydown", (ev) => {
   if (ev.code === "Escape") {
     closeMenu();
     stopNameEdit(false);
+    if (!dialogOpen() && !accountPage.hidden) closeAccountPage();
   }
+  if (dialogOpen() || !accountPage.hidden) return;
   if (ev.code === "Space") {
     ev.preventDefault();
     requestNext();

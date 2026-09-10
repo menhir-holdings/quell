@@ -150,6 +150,81 @@ body {
   font-weight: 500;
 }
 
+.account-page {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 1.15rem;
+  width: min(100%, 28.5rem);
+  margin: 0 auto;
+}
+
+.account-page h2 {
+  font-family: var(--font-display);
+  font-size: 1.7rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.text-back {
+  font: inherit;
+  width: fit-content;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.field span {
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.field input {
+  font: inherit;
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.75rem 0.85rem;
+  box-shadow: var(--shadow);
+}
+
+.danger-link {
+  font: inherit;
+  align-self: flex-start;
+  color: #c43b3b;
+  background: none;
+  border: 0;
+  padding: 0.2rem 0;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.pill.danger {
+  background: #c43b3b;
+  color: #fff;
+  border-color: #c43b3b;
+}
+
+#app[data-surface="account"] #sets,
+#app[data-surface="account"] .hero-meta {
+  display: none;
+}
+
 .confirm-dialog {
   border: 0;
   border-radius: var(--radius);
@@ -206,6 +281,11 @@ body {
   color: var(--muted);
   border-color: var(--line);
   cursor: not-allowed;
+}
+
+.confirm-form .pill.danger:disabled {
+  background: var(--card);
+  color: var(--muted);
 }
 
 .dialog-cancel {

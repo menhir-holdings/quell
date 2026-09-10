@@ -146,6 +146,29 @@ export function createAccount(label: string): Account {
   return account;
 }
 
+export function renameAccount(id: string, label: string): Account {
+  const trimmed = label.trim();
+  const vault = mutate((v) => {
+    const acc = v.accounts.find((a) => a.id === id);
+    if (acc && trimmed) acc.label = trimmed;
+  });
+  return vault.accounts.find((a) => a.id === vault.currentId) ?? vault.accounts[0];
+}
+
+export function deleteAccount(id: string): Account {
+  const vault = mutate((v) => {
+    if (v.accounts.length <= 1) {
+      const fresh = makeAccount("You");
+      v.accounts = [fresh];
+      v.currentId = fresh.id;
+      return;
+    }
+    v.accounts = v.accounts.filter((a) => a.id !== id);
+    if (v.currentId === id) v.currentId = v.accounts[0].id;
+  });
+  return vault.accounts.find((a) => a.id === vault.currentId) ?? vault.accounts[0];
+}
+
 export function getRecord(set: SetId, id: string): CaseRecord {
   return currentAccount().cases[set]?.[id] ?? emptyRecord();
 }
