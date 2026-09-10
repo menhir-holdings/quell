@@ -1,10 +1,9 @@
 export type SetId = "oll" | "pll";
 
-export type Phase = "learn" | "practice";
-
-export type NextMode = "random" | "pick";
-
 export type CubeView = "2d" | "3d";
+
+/** How the next case is chosen. UI stays the same; only the picker changes. */
+export type SchedulePolicy = "variety";
 
 export type AlgVariant = {
   moves: string;
@@ -31,15 +30,29 @@ export type Deal = {
   stickering: "OLL" | "PLL";
 };
 
-export type CaseProgress = {
-  inPractice: boolean;
+/** Per-case user data. `name` is live; the rest is for later targeting. */
+export type CaseRecord = {
   name: string;
+  seen: number;
+  revealed: number;
+  lastSeenAt: number | null;
+  namedAt: number | null;
+};
+
+export type Account = {
+  id: string;
+  label: string;
+  createdAt: number;
+  cases: Record<SetId, Record<string, CaseRecord>>;
+};
+
+export type Vault = {
+  version: 1;
+  currentId: string;
+  accounts: Account[];
 };
 
 export type Settings = {
   set: SetId;
-  phase: Phase;
-  nextMode: NextMode;
-  chaining: boolean;
   view: CubeView;
 };

@@ -1,7 +1,7 @@
 import { Alg } from "cubing/alg";
 import { OLL } from "./data/oll";
 import { PLL } from "./data/pll";
-import { displayName } from "./progress";
+import { caseName } from "./account";
 import type { CaseDef, Deal, SetId } from "./types";
 
 export function casesFor(set: SetId): CaseDef[] {
@@ -30,24 +30,10 @@ export function dealCase(set: SetId, entry: CaseDef): Deal {
     set,
     caseId: entry.id,
     canonicalName: entry.name,
-    displayName: displayName(set, entry.id, entry.name),
+    displayName: caseName(set, entry.id),
     group: entry.group,
     setupAlg: invertMoves(solveAlg),
     solveAlg,
     stickering: set === "oll" ? "OLL" : "PLL",
   };
-}
-
-export function pickRandom(pool: CaseDef[], avoidId?: string): CaseDef {
-  const choices =
-    pool.length > 1 && avoidId
-      ? pool.filter((entry) => entry.id !== avoidId)
-      : pool;
-  return choices[Math.floor(Math.random() * choices.length)];
-}
-
-export function nextInOrder(pool: CaseDef[], currentId?: string): CaseDef {
-  const idx = pool.findIndex((entry) => entry.id === currentId);
-  if (idx < 0) return pool[0];
-  return pool[(idx + 1) % pool.length];
 }

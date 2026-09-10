@@ -2,12 +2,20 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta
-      name="description"
-      content="Quell — learn and practice full OLL and PLL."
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
+    <meta name="description" content="Quell — chained OLL and PLL flashcards." />
+    <meta name="theme-color" content="#f2f3f7" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="Quell" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <title>Quell — OLL / PLL</title>
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
@@ -18,15 +26,10 @@
   <body>
     <div id="app">
       <header class="hero">
-        <div>
-          <h1>Quell</h1>
-          <p class="tagline">Learn the cases. Practice the ones you keep.</p>
-          <nav id="sets" class="mode-tabs" aria-label="Set"></nav>
-          <nav id="phases" class="mode-tabs" aria-label="Phase"></nav>
-        </div>
-        <div class="hero-end">
-          <p class="hero-meta" id="status"></p>
-          <div class="overflow">
+        <h1>Quell</h1>
+        <nav id="sets" class="mode-tabs" aria-label="Set"></nav>
+        <p class="hero-meta" id="status"></p>
+        <div class="overflow">
             <button
               type="button"
               id="btn-menu"
@@ -47,17 +50,14 @@
               </svg>
             </button>
             <div id="menu" class="menu" hidden role="menu">
-              <button type="button" role="menuitem" id="btn-reset-learned">
-                Reset learned cases
+              <p class="menu-kicker">Accounts</p>
+              <div id="account-list"></div>
+              <button type="button" role="menuitem" id="btn-new-account">
+                New account
               </button>
             </div>
           </div>
-        </div>
       </header>
-
-      <section class="filters" id="filters" aria-label="Practice controls"></section>
-
-      <p id="empty" class="empty" hidden></p>
 
       <section class="stage" id="stage">
         <div class="cube-card">
@@ -65,56 +65,101 @@
           <div id="player-host" class="player-host" hidden></div>
           <nav id="view-tabs" class="view-tabs" aria-label="Cube view"></nav>
         </div>
-        <div class="meta">
-          <p id="case-label" class="case-label"></p>
-          <p id="case-sub" class="case-sub"></p>
-          <p id="practice-prompt" class="practice-prompt" hidden>
-            Execute this alg on the cube you have now.
-          </p>
-          <label class="name-field">
-            <span>Your name for this case</span>
-            <input
-              id="custom-name"
-              type="text"
-              maxlength="40"
-              placeholder="e.g. headlights, sune fish, T"
-              autocomplete="off"
-            />
-          </label>
-          <div id="setup-block">
-            <p class="scramble-kicker" id="setup-kicker">Setup</p>
-            <pre id="setup" class="scramble"></pre>
-          </div>
-          <button type="button" id="solve-card" class="solve-card" aria-expanded="false">
-            <span class="solve-kicker" id="solve-kicker">Solve</span>
-            <span id="solve-body" class="solve-body">Tap to reveal</span>
-          </button>
-          <div class="actions">
-            <button type="button" id="btn-next" class="pill primary" hidden>
-              Next
-            </button>
-            <button type="button" id="btn-learned" class="learned" aria-pressed="false">
-              Learned
-            </button>
-          </div>
+
+        <p id="case-name" class="case-name" hidden></p>
+        <input
+          id="name-edit"
+          class="name-edit"
+          type="text"
+          maxlength="40"
+          autocomplete="off"
+          hidden
+          aria-label="Case name"
+        />
+
+        <button type="button" id="alg-card" class="solve-card" aria-expanded="false">
+          <span class="solve-kicker">Alg</span>
+          <span id="alg-body" class="solve-body">Tap to reveal</span>
+        </button>
+
+        <button type="button" id="check-card" class="solve-card" aria-expanded="false">
+          <span class="solve-kicker">After this alg</span>
+          <span id="check-body" class="solve-body">Tap to check the cube</span>
+        </button>
+
+        <div class="actions">
+          <button type="button" id="btn-next" class="pill primary">Next</button>
         </div>
       </section>
 
-      <section id="grid-wrap" class="grid-wrap" hidden>
-        <h2 id="grid-title">Cases</h2>
-        <p class="section-lead" id="grid-lead"></p>
-        <div id="grid" class="case-grid"></div>
+      <section class="account-page" id="account-page" hidden>
+        <button type="button" id="account-back" class="text-back">Back</button>
+        <h2>Account</h2>
+        <label class="field">
+          <span>Name</span>
+          <input
+            id="account-name"
+            type="text"
+            maxlength="32"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </label>
+        <button type="button" id="btn-delete-account" class="danger-link">
+          Delete account
+        </button>
       </section>
     </div>
 
-    <dialog id="reset-dialog" class="confirm-dialog">
-      <form method="dialog" class="confirm-form">
-        <h2>Reset learned cases?</h2>
-        <p>Every OLL and PLL goes back to Learn. Names stay.</p>
-        <button type="submit" value="reset" class="pill warn">Reset learned</button>
-        <button type="submit" value="cancel" class="dialog-cancel">Cancel</button>
+    <dialog id="name-dialog" class="confirm-dialog">
+      <form method="dialog" class="confirm-form" id="name-form">
+        <h2>Name this case</h2>
+        <p>You’ll see this name when it comes up again.</p>
+        <input
+          id="name-dialog-input"
+          type="text"
+          maxlength="40"
+          placeholder="e.g. sune fish, T"
+          autocomplete="off"
+          required
+        />
+        <button type="submit" value="save" id="btn-save-name" class="pill primary" disabled>
+          Save
+        </button>
+        <button type="button" value="cancel" class="dialog-cancel">Cancel</button>
       </form>
     </dialog>
+
+    <dialog id="account-dialog" class="confirm-dialog">
+      <form method="dialog" class="confirm-form" id="account-form">
+        <h2>New account</h2>
+        <p>Names stay on this account. Switching does not mix them.</p>
+        <input
+          id="account-dialog-input"
+          type="text"
+          maxlength="32"
+          placeholder="e.g. Phil, practice cube"
+          autocomplete="off"
+          required
+        />
+        <button type="submit" value="save" id="btn-save-account" class="pill primary" disabled>
+          Create
+        </button>
+        <button type="button" value="cancel" class="dialog-cancel">Cancel</button>
+      </form>
+    </dialog>
+
+    <dialog id="delete-dialog" class="confirm-dialog">
+      <form method="dialog" class="confirm-form" id="delete-form">
+        <h2 id="delete-title">Delete this account?</h2>
+        <p id="delete-copy">
+          Case names on this account go with it. This cannot be undone.
+        </p>
+        <button type="submit" value="delete" class="pill danger">Delete account</button>
+        <button type="button" value="cancel" class="dialog-cancel">Cancel</button>
+      </form>
+    </dialog>
+
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
