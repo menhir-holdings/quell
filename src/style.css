@@ -7,6 +7,7 @@
   --ink: #111111;
   --pad: max(1.15rem, env(safe-area-inset-top)) max(1.15rem, env(safe-area-inset-right))
     max(1.15rem, env(safe-area-inset-bottom)) max(1.15rem, env(safe-area-inset-left));
+  --shadow-outset: 0.9rem;
   --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
   --font-ui: "Manrope", "Segoe UI", sans-serif;
   --shadow: 0 1px 2px rgba(20, 20, 20, 0.04), 0 10px 28px rgba(20, 20, 20, 0.06);
@@ -325,6 +326,7 @@ body {
 .view-tabs {
   justify-content: center;
   flex-shrink: 0;
+  padding-top: 0.1rem;
 }
 
 .mode-tab,
@@ -352,8 +354,9 @@ body {
   flex-direction: column;
   align-items: stretch;
   gap: var(--stage-gap);
-  width: min(100%, 28.5rem);
+  width: min(100%, calc(28.5rem + 2 * var(--shadow-outset)));
   margin: 0 auto;
+  padding: 0.2rem var(--shadow-outset) 1.15rem;
   flex: 1;
   min-height: 0;
   overflow: hidden;
@@ -364,10 +367,10 @@ body {
   border: 1px solid var(--line);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 0.7rem 0.75rem 0.55rem;
+  padding: 1.2rem 1.15rem 1.05rem;
   display: flex;
   flex-direction: column;
-  gap: 0.45rem;
+  gap: 0.7rem;
   flex: 0 0 auto;
   height: calc(
     100% - var(--alg-expanded) - var(--check-expanded) - var(--actions-h) -
@@ -381,7 +384,7 @@ body {
 .cube-card .case-name,
 .cube-card .name-edit {
   font-size: 1.12rem;
-  padding: 0.1rem 0.2rem 0.05rem;
+  padding: 0.2rem 0.35rem 0.15rem;
 }
 
 .ll-diagram {

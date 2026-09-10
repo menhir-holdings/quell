@@ -1,12 +1,15 @@
 # Quell — Status
 
-**Version:** 0.7.2  
+**Version:** 0.7.3  
 **As of:** 2026-09-10  
 **SoT:** [Linear — Quell](https://linear.app/menhir-holdings/project/quell-4c873f24ef7f)  
 **Checkout:** `Menhir Holdings/Game/Quell`
 
 ## Shipped
 
+- [MT-201](https://linear.app/menhir-holdings/issue/MT-201) — unclip shadows, empty rename caret, name-prompt timing  
+  Live: **https://quellcube.vercel.app**  
+  [PR #9](https://github.com/menhir-holdings/quell/pull/9)
 - [MT-200](https://linear.app/menhir-holdings/issue/MT-200) — Change sheet hidden when closed, floating picker, cube reserved without empty cards  
   Live: **https://quellcube.vercel.app**  
   [PR #8](https://github.com/menhir-holdings/quell/pull/8)
