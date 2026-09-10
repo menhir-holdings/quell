@@ -7,6 +7,9 @@
 
 ## Shipped
 
+- [MT-200](https://linear.app/menhir-holdings/issue/MT-200) — Change sheet hidden when closed, floating picker, cube reserved without empty cards  
+  Live: **https://quellcube.vercel.app**  
+  [PR #8](https://github.com/menhir-holdings/quell/pull/8)
 - [MT-198](https://linear.app/menhir-holdings/issue/MT-198) — name in diagram, Change case, persist names, canonical labels  
   Live: **https://quellcube.vercel.app**  
   [PR #7](https://github.com/menhir-holdings/quell/pull/7)
