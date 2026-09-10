@@ -75,20 +75,10 @@ body {
   flex-shrink: 0;
 }
 
-.hero-meta {
-  color: var(--muted);
-  font-size: 0.82rem;
-  margin-left: auto;
-  min-height: 0;
-}
-
-.hero-meta:empty {
-  display: none;
-}
-
 .overflow {
   position: relative;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .icon-btn {
@@ -234,8 +224,7 @@ body {
   border-color: #c43b3b;
 }
 
-#app[data-surface="account"] #sets,
-#app[data-surface="account"] .hero-meta {
+#app[data-surface="account"] #sets {
   display: none;
 }
 
@@ -370,6 +359,12 @@ body {
   overflow: hidden;
 }
 
+.cube-card .case-name,
+.cube-card .name-edit {
+  font-size: 1.12rem;
+  padding: 0.1rem 0.2rem 0.05rem;
+}
+
 .ll-diagram {
   width: 100%;
   flex: 1;
@@ -412,7 +407,7 @@ body {
 }
 
 .case-name {
-  cursor: default;
+  cursor: pointer;
   user-select: none;
 }
 
@@ -487,8 +482,9 @@ body {
 }
 
 .actions {
-  display: flex;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: 1fr 1.45fr;
+  gap: 0.5rem;
   flex-shrink: 0;
   padding-bottom: 0.15rem;
   margin-top: auto;
@@ -499,13 +495,106 @@ body {
   justify-content: center;
 }
 
+.sheet-dialog {
+  border: 0;
+  border-radius: var(--radius) var(--radius) 0 0;
+  padding: 0;
+  width: min(100%, 28.5rem);
+  height: min(85dvh, 40rem);
+  max-height: min(85dvh, 40rem);
+  margin: auto auto 0;
+  box-shadow: var(--shadow);
+}
+
+.sheet-dialog::backdrop {
+  background: rgba(20, 20, 20, 0.42);
+}
+
+.sheet-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.7rem;
+  padding: 1.15rem 1.1rem calc(1rem + env(safe-area-inset-bottom));
+  height: 100%;
+  min-height: 0;
+}
+
+.sheet-form h2 {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  text-align: center;
+}
+
+.sheet-form input[type="search"] {
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--text);
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 0.7rem 0.8rem;
+}
+
+.change-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  overflow: auto;
+  min-height: 0;
+  flex: 1;
+  -webkit-overflow-scrolling: touch;
+}
+
+.change-group {
+  color: var(--muted);
+  letter-spacing: 0.04em;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.65rem 0.55rem 0.2rem;
+}
+
+.change-case {
+  font: inherit;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: 0;
+  border-radius: 10px;
+  padding: 0.7rem 0.7rem;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+}
+
+.change-case:hover,
+.change-case:focus-visible,
+.change-case[aria-current="true"] {
+  background: #f4f5f8;
+}
+
+.change-case-name {
+  font-weight: 600;
+  font-size: 0.98rem;
+}
+
+.change-case-meta {
+  color: var(--muted);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
 @media (min-width: 640px) {
   .hero h1 {
     font-size: 1.9rem;
   }
 
-  .case-name,
-  .name-edit {
-    font-size: 1.45rem;
+  .cube-card .case-name,
+  .cube-card .name-edit {
+    font-size: 1.28rem;
   }
 }

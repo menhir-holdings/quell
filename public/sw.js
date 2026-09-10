@@ -1,10 +1,8 @@
-const CACHE = "quell-v1";
+const CACHE = "quell-v2";
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE).then((cache) => cache.addAll(["/", "/manifest.webmanifest", "/favicon.svg"])),
-  );
   self.skipWaiting();
+  event.waitUntil(caches.open(CACHE));
 });
 
 self.addEventListener("activate", (event) => {
@@ -18,5 +16,13 @@ self.addEventListener("activate", (event) => {
 self.addEventListener("fetch", (event) => {
   if (event.request.method !== "GET") return;
   if (event.request.mode !== "navigate") return;
-  event.respondWith(fetch(event.request).catch(() => caches.match("/")));
+  event.respondWith(
+    fetch(event.request)
+      .then((res) => {
+        const copy = res.clone();
+        void caches.open(CACHE).then((cache) => cache.put("/", copy));
+        return res;
+      })
+      .catch(() => caches.match("/").then((cached) => cached ?? Response.error())),
+  );
 });

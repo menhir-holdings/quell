@@ -1,9 +1,14 @@
 # Quell — Status
 
-**Version:** 0.6.0  
+**Version:** 0.7.0  
 **As of:** 2026-09-10  
 **SoT:** [Linear — Quell](https://linear.app/menhir-holdings/project/quell-4c873f24ef7f)  
 **Checkout:** `Menhir Holdings/Game/Quell`
+
+## Open
+
+- [MT-198](https://linear.app/menhir-holdings/issue/MT-198) — name in diagram, Change case, persist names, algo copy  
+  In Review once preview is up
 
 ## Shipped
 

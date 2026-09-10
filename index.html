@@ -28,7 +28,6 @@
       <header class="hero">
         <h1>Quell</h1>
         <nav id="sets" class="mode-tabs" aria-label="Set"></nav>
-        <p class="hero-meta" id="status"></p>
         <div class="overflow">
             <button
               type="button"
@@ -61,33 +60,33 @@
 
       <section class="stage" id="stage">
         <div class="cube-card">
+          <p id="case-name" class="case-name" hidden></p>
+          <input
+            id="name-edit"
+            class="name-edit"
+            type="text"
+            maxlength="40"
+            autocomplete="off"
+            hidden
+            aria-label="Case name"
+          />
           <div id="ll-diagram" class="ll-diagram"></div>
           <div id="player-host" class="player-host" hidden></div>
           <nav id="view-tabs" class="view-tabs" aria-label="Cube view"></nav>
         </div>
 
-        <p id="case-name" class="case-name" hidden></p>
-        <input
-          id="name-edit"
-          class="name-edit"
-          type="text"
-          maxlength="40"
-          autocomplete="off"
-          hidden
-          aria-label="Case name"
-        />
-
         <button type="button" id="alg-card" class="solve-card" aria-expanded="false">
-          <span class="solve-kicker">Alg</span>
+          <span class="solve-kicker">Algo</span>
           <span id="alg-body" class="solve-body">Tap to reveal</span>
         </button>
 
         <button type="button" id="check-card" class="solve-card" aria-expanded="false">
-          <span class="solve-kicker">After this alg</span>
+          <span class="solve-kicker">After this algo</span>
           <span id="check-body" class="solve-body">Tap to check the cube</span>
         </button>
 
         <div class="actions">
+          <button type="button" id="btn-change" class="pill">Change</button>
           <button type="button" id="btn-next" class="pill primary">Next</button>
         </div>
       </section>
@@ -110,6 +109,21 @@
         </button>
       </section>
     </div>
+
+    <dialog id="change-dialog" class="sheet-dialog">
+      <form method="dialog" class="sheet-form">
+        <h2>Change case</h2>
+        <input
+          id="change-search"
+          type="search"
+          placeholder="Name or number"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div id="change-list" class="change-list" role="listbox" aria-label="Cases"></div>
+        <button type="button" value="cancel" class="dialog-cancel">Cancel</button>
+      </form>
+    </dialog>
 
     <dialog id="name-dialog" class="confirm-dialog">
       <form method="dialog" class="confirm-form" id="name-form">

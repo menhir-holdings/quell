@@ -4,6 +4,7 @@ import {
   createAccount,
   currentAccount,
   deleteAccount,
+  hydrateVault,
   listAccounts,
   markRevealed,
   markShown,
@@ -11,7 +12,7 @@ import {
   setCaseName,
   switchAccount,
 } from "./account";
-import { dealCase, findCase, joinAlgs } from "./deal";
+import { casesGrouped, dealCase, findCase, joinAlgs } from "./deal";
 import { llMarkup } from "./ll";
 import { chooseCase } from "./schedule";
 import type { CubeView, Deal, SetId, Settings } from "./types";
@@ -52,7 +53,6 @@ let current: Deal | null = null;
 let algOpen = false;
 let checkOpen = false;
 let chain = "";
-let chainCount = 0;
 let recent: string[] = [];
 let checkGen = 0;
 let editingName = false;
@@ -61,7 +61,6 @@ const appEl = document.querySelector("#app") as HTMLElement;
 const stageEl = document.querySelector("#stage") as HTMLElement;
 const setsEl = document.querySelector("#sets") as HTMLElement;
 const viewTabsEl = document.querySelector("#view-tabs") as HTMLElement;
-const statusEl = document.querySelector("#status") as HTMLElement;
 const nameEl = document.querySelector("#case-name") as HTMLElement;
 const nameEdit = document.querySelector("#name-edit") as HTMLInputElement;
 const algCard = document.querySelector("#alg-card") as HTMLButtonElement;
@@ -89,6 +88,10 @@ const btnDeleteAccount = document.querySelector("#btn-delete-account") as HTMLBu
 const deleteDialog = document.querySelector("#delete-dialog") as HTMLDialogElement;
 const deleteTitle = document.querySelector("#delete-title") as HTMLElement;
 const deleteCopy = document.querySelector("#delete-copy") as HTMLElement;
+const btnChange = document.querySelector("#btn-change") as HTMLButtonElement;
+const changeDialog = document.querySelector("#change-dialog") as HTMLDialogElement;
+const changeSearch = document.querySelector("#change-search") as HTMLInputElement;
+const changeList = document.querySelector("#change-list") as HTMLElement;
 
 let player: TwistyPlayer | null = null;
 
@@ -98,7 +101,6 @@ function named(value: string): boolean {
 
 function resetChain(): void {
   chain = "";
-  chainCount = 0;
   recent = [];
 }
 
@@ -216,7 +218,7 @@ function confirmDeleteAccount(): void {
 }
 
 function dialogOpen(): boolean {
-  return nameDialog.open || accountDialog.open || deleteDialog.open;
+  return nameDialog.open || accountDialog.open || deleteDialog.open || changeDialog.open;
 }
 
 function renderAccounts(): void {
@@ -246,10 +248,6 @@ function renderAccounts(): void {
     });
     accountList.append(button);
   }
-}
-
-function paintStatus(): void {
-  statusEl.textContent = chainCount ? `chain ${chainCount}` : "";
 }
 
 function renderChrome(): void {
@@ -374,7 +372,6 @@ function showDeal(d: Deal): void {
     remountPlayer();
     applyAlgToPlayer(d);
   }
-  paintStatus();
   markShown(d.set, d.caseId);
 }
 
@@ -403,7 +400,6 @@ function dealFresh(): void {
 function advance(): void {
   if (current) {
     chain = joinAlgs(chain, current.solveAlg);
-    chainCount += 1;
     recent.push(current.caseId);
   }
   const entry = chooseCase({
@@ -413,6 +409,63 @@ function advance(): void {
   });
   const found = findCase(settings.set, entry.id) ?? entry;
   showDeal(dealCase(settings.set, found));
+}
+
+function pickCase(id: string): void {
+  const entry = findCase(settings.set, id);
+  if (!entry) return;
+  changeDialog.close("pick");
+  resetChain();
+  showDeal(dealCase(settings.set, entry));
+}
+
+function paintChangeList(): void {
+  const q = changeSearch.value.trim().toLowerCase();
+  changeList.innerHTML = "";
+  let lastGroup = "";
+  for (const entry of casesGrouped(settings.set)) {
+    const custom = caseName(settings.set, entry.id);
+    const hay = `${custom} ${entry.name} ${entry.id} ${entry.group}`.toLowerCase();
+    if (q && !hay.includes(q)) continue;
+    if (entry.group !== lastGroup) {
+      lastGroup = entry.group;
+      const head = document.createElement("p");
+      head.className = "change-group";
+      head.textContent = entry.group;
+      changeList.append(head);
+    }
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "change-case";
+    button.setAttribute("role", "option");
+    if (current?.caseId === entry.id) button.setAttribute("aria-current", "true");
+    const title = document.createElement("span");
+    title.className = "change-case-name";
+    title.textContent = custom || entry.name;
+    button.append(title);
+    if (custom && custom !== entry.name) {
+      const meta = document.createElement("span");
+      meta.className = "change-case-meta";
+      meta.textContent = entry.name;
+      button.append(meta);
+    }
+    button.addEventListener("click", () => pickCase(entry.id));
+    changeList.append(button);
+  }
+  if (!changeList.querySelector(".change-case")) {
+    const empty = document.createElement("p");
+    empty.className = "change-case-meta";
+    empty.textContent = "No cases match.";
+    changeList.append(empty);
+  }
+}
+
+function openChange(): void {
+  commitName();
+  changeSearch.value = "";
+  paintChangeList();
+  changeDialog.showModal();
+  changeSearch.focus();
 }
 
 function requestNext(): void {
@@ -458,6 +511,9 @@ nameEdit.addEventListener("keydown", (ev) => {
 nameEdit.addEventListener("blur", () => stopNameEdit(true));
 
 document.querySelector("#btn-next")!.addEventListener("click", () => requestNext());
+btnChange.addEventListener("click", () => openChange());
+changeSearch.addEventListener("input", () => paintChangeList());
+changeDialog.querySelector("form")!.addEventListener("submit", (ev) => ev.preventDefault());
 algCard.addEventListener("click", () => {
   commitName();
   if (!algOpen) revealAlg();
@@ -552,6 +608,9 @@ window.addEventListener("keydown", (ev) => {
 });
 
 void renderAll();
+void hydrateVault().then(() => {
+  if (current) paintName();
+});
 
 if (import.meta.env.PROD && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
