@@ -531,9 +531,11 @@ function paintChangeList(): void {
 function openChange(): void {
   commitName();
   changeSearch.value = "";
-  paintChangeList();
   changeDialog.showModal();
-  changeSearch.focus();
+  requestAnimationFrame(() => {
+    paintChangeList();
+    changeSearch.focus();
+  });
 }
 
 function requestNext(): void {
