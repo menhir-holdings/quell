@@ -482,7 +482,7 @@ nameDialog.addEventListener("close", () => {
   }
   setCaseName(current.set, current.caseId, nameDialogInput.value);
   current.displayName = caseName(current.set, current.caseId);
-  paintName();
+  advance();
 });
 
 accountDialogInput.addEventListener("input", () => {
@@ -552,3 +552,9 @@ window.addEventListener("keydown", (ev) => {
 });
 
 void renderAll();
+
+if (import.meta.env.PROD && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    void navigator.serviceWorker.register("/sw.js");
+  });
+}

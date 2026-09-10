@@ -7,17 +7,15 @@
 
 ## Shipped
 
+- [MT-197](https://linear.app/menhir-holdings/issue/MT-197) — single chained flashcard, local accounts, standalone PWA shell  
+  Live: **https://quellcube.vercel.app**  
+  [PR #6](https://github.com/menhir-holdings/quell/pull/6)
 - [MT-195](https://linear.app/menhir-holdings/issue/MT-195) — unified Practice, chaining, hamburger reset, Learn continues in place  
   Live: **https://quellcube.vercel.app**
 - [MT-194](https://linear.app/menhir-holdings/issue/MT-194) — STC 2D diagrams, reveal on the alg card, Learned, restyle  
   [PR #3](https://github.com/menhir-holdings/quell/pull/3)
 - [MT-193](https://linear.app/menhir-holdings/issue/MT-193) — OLL/PLL learn + practice trainer  
   [PR #2](https://github.com/menhir-holdings/quell/pull/2)
-
-## Open
-
-- [MT-197](https://linear.app/menhir-holdings/issue/MT-197) — single chained flashcard + local accounts  
-  Branch: `ledoit/mt-197-single-chained-flashcard-local-accounts`
 
 ## Closed
 
