@@ -7,6 +7,9 @@
 
 ## Shipped
 
+- [MT-201](https://linear.app/menhir-holdings/issue/MT-201) — unclip shadows, empty rename caret, name-prompt timing  
+  Live: **https://quellcube.vercel.app**  
+  [PR #9](https://github.com/menhir-holdings/quell/pull/9)
 - [MT-200](https://linear.app/menhir-holdings/issue/MT-200) — Change sheet hidden when closed, floating picker, cube reserved without empty cards  
   Live: **https://quellcube.vercel.app**  
   [PR #8](https://github.com/menhir-holdings/quell/pull/8)
