@@ -476,11 +476,11 @@ body {
 }
 
 #alg-card[aria-expanded="true"] {
-  height: var(--alg-expanded);
+  max-height: var(--alg-expanded);
 }
 
 #check-card[aria-expanded="true"] {
-  height: var(--check-expanded);
+  max-height: var(--check-expanded);
 }
 
 .solve-card:hover,
