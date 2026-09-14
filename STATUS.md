@@ -1,7 +1,7 @@
 # Quell — Status
 
-**Version:** 0.7.3  
-**As of:** 2026-09-10  
+**Version:** 0.8.0  
+**As of:** 2026-09-14  
 **SoT:** [Linear — Quell](https://linear.app/menhir-holdings/project/quell-4c873f24ef7f)  
 **Checkout:** `Menhir Holdings/Game/Quell`
 
@@ -22,6 +22,10 @@
 - [MT-194](https://linear.app/menhir-holdings/issue/MT-194) — STC 2D diagrams, reveal on the alg card, Learned, restyle
 - [MT-193](https://linear.app/menhir-holdings/issue/MT-193) — OLL/PLL learn + practice trainer
 
+## In review
+
+- [MT-227](https://linear.app/menhir-holdings/issue/MT-227) — Train / Cases IA: lookup without losing place, one-tap subset drills, stickerless tab mark
+
 ## Closed
 
 | Issue | What |
@@ -30,5 +34,7 @@
 | [MT-192](https://linear.app/menhir-holdings/issue/MT-192) | v1 multi-mode trainer — superseded |
 
 ## Next
+
+- [MT-228](https://linear.app/menhir-holdings/issue/MT-228) — stickerless tab favicon (black strokes off the cube mark) — landed on the MT-227 branch; close when that ships
 
 See [TODO.md](./TODO.md).

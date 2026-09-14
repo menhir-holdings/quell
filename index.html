@@ -24,9 +24,10 @@
     />
   </head>
   <body>
-    <div id="app">
+    <div id="app" data-surface="train">
       <header class="hero">
         <h1>Quell</h1>
+        <nav id="places" class="places" aria-label="Place"></nav>
         <nav id="sets" class="mode-tabs" aria-label="Set"></nav>
         <div class="overflow">
             <button
@@ -85,10 +86,33 @@
           <span id="check-body" class="solve-body">Tap to check the cube</span>
         </button>
 
+        <p id="queue-chip" class="queue-chip" hidden>
+          <span id="queue-label"></span>
+          <button type="button" id="btn-clear-queue" class="text-back">All cases</button>
+        </p>
+
         <div class="actions">
-          <button type="button" id="btn-change" class="pill">Change</button>
+          <button type="button" id="btn-lookup" class="pill">Look up</button>
           <button type="button" id="btn-next" class="pill primary">Next</button>
         </div>
+      </section>
+
+      <section class="cases-page" id="cases-page" hidden>
+        <button type="button" id="btn-resume" class="resume-bar" hidden>
+          <span class="resume-kicker">Back to train</span>
+          <span id="resume-name" class="resume-name"></span>
+        </button>
+        <input
+          id="cases-search"
+          type="search"
+          placeholder="Name, number, or group"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <p class="change-group">Start a subset</p>
+        <div id="queue-list" class="queue-list"></div>
+        <p class="change-group">Look up a case</p>
+        <div id="cases-list" class="cases-list" role="list"></div>
       </section>
 
       <section class="account-page" id="account-page" hidden>
@@ -108,22 +132,16 @@
           Delete account
         </button>
       </section>
-    </div>
 
-    <dialog id="change-dialog" class="sheet-dialog">
-      <form method="dialog" class="sheet-form">
-        <h2>Change case</h2>
-        <input
-          id="change-search"
-          type="search"
-          placeholder="Name or number"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <div id="change-list" class="change-list" role="listbox" aria-label="Cases"></div>
-        <button type="button" value="cancel" class="dialog-cancel">Cancel</button>
-      </form>
-    </dialog>
+      <nav id="dock" class="dock" aria-label="Place">
+        <button type="button" id="dock-train" class="dock-tab" data-place="train">
+          Train
+        </button>
+        <button type="button" id="dock-cases" class="dock-tab" data-place="cases">
+          Cases
+        </button>
+      </nav>
+    </div>
 
     <dialog id="name-dialog" class="confirm-dialog">
       <form method="dialog" class="confirm-form" id="name-form">

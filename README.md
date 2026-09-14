@@ -1,22 +1,23 @@
 # Quell
 
-Chained OLL / PLL flashcards. One toggle, one Next.
+Chained OLL / PLL flashcards. Train holds the card. Cases holds lookup and subset drills.
 
 The big picture is the case to execute. Reveal the alg when you need it; check the compounded last-layer after that alg on the cube you already have. Next always chains. If the case still has no name, Next asks for one before moving on.
 
 The name sits in the diagram box, just above the picture — your name if you gave one, otherwise `OLL 13` / `T`. Click it to rename.
 
 ### Flow
-- **OLL / PLL** — last layer only. Always chained.
+- **Train** — the flashcard. Mid-solve, **Look up** opens Cases; the chain and card stay put. **Back to train** returns to the same case.
+- **Cases** — catalog, not a sheet. One tap **Drill** starts a group (OCLL, G, …). Tap a case to see the alg without touching Train. OLL/PLL on this surface browses only.
+- **OLL / PLL** — last layer only. On Train they change the session; on Cases they do not.
 - **Top** — the case. **3D** — the cube in your hands.
 - **Alg** — tap to reveal the moves; tap again to play.
 - **After this alg** — tap to see the last layer you should have.
-- **Change** — jump to any case in the current set (diagram + name).
 - **Menu** — local accounts. Names (and later training stats) live per account.
 
 Algs follow [SolveTheCube](https://solvethecube.com/algorithms): easy to memoise and turn, built around sexy `(R U R' U')`, sledge `(R' F R F')`, and `(R U R' U)`.
 
-Progress lives in the browser (`localStorage` + IndexedDB) so names survive deploys on the same origin. Space = next, R = reveal alg.
+Progress lives in the browser (`localStorage` + IndexedDB) so names survive deploys on the same origin. Space = next, R = reveal alg, L = look up, Escape = back to train.
 
 Ship each pass to **https://quellcube.vercel.app**. Do not leave work sitting on a preview.
 
@@ -30,6 +31,7 @@ Ship each pass to **https://quellcube.vercel.app**. Do not leave work sitting on
 
 | ID | Title | Status |
 |----|-------|--------|
+| [MT-227](https://linear.app/menhir-holdings/issue/MT-227) | Train / Cases lookup + targeted drills | In Review |
 | [MT-198](https://linear.app/menhir-holdings/issue/MT-198) | Name in diagram, Change case, persist names | Done |
 | [MT-197](https://linear.app/menhir-holdings/issue/MT-197) | Single chained flashcard + local accounts | Done |
 | [MT-196](https://linear.app/menhir-holdings/issue/MT-196) | Learn unlearned chain states (superseded) | Canceled |

@@ -12,22 +12,48 @@ import {
   setCaseName,
   switchAccount,
 } from "./account";
-import { casesGrouped, dealCase, findCase, invertMoves, joinAlgs } from "./deal";
+import {
+  casesFor,
+  casesGrouped,
+  dealCase,
+  findCase,
+  groupsFor,
+  invertMoves,
+  joinAlgs,
+} from "./deal";
 import { llMarkup } from "./ll";
 import { chooseCase } from "./schedule";
-import type { CubeView, Deal, SetId, Settings } from "./types";
+import type { CubeView, Deal, DrillQueue, SetId, Settings } from "./types";
 import "./style.css";
 
-const SETTINGS_KEY = "quell.settings.v4";
+const SETTINGS_KEY = "quell.settings.v5";
+const LEGACY_V4 = "quell.settings.v4";
 const LEGACY_V3 = "quell.settings.v3";
 const LEGACY_V2 = "quell.settings.v2";
 
-const DEFAULTS: Settings = { set: "oll", view: "2d" };
+type Surface = "train" | "cases" | "account";
 
-function coerceSettings(parsed: Partial<Settings>): Settings {
+const DEFAULTS: Settings = { set: "oll", view: "2d", queue: null };
+
+function coerceQueue(raw: unknown): DrillQueue | null {
+  if (!raw || typeof raw !== "object") return null;
+  const parsed = raw as Partial<DrillQueue>;
+  if (parsed.set !== "oll" && parsed.set !== "pll") return null;
+  if (!Array.isArray(parsed.ids) || !parsed.ids.length) return null;
+  const ids = parsed.ids.map(String).filter(Boolean);
+  if (!ids.length) return null;
+  return {
+    set: parsed.set,
+    label: typeof parsed.label === "string" && parsed.label.trim() ? parsed.label : "Subset",
+    ids,
+  };
+}
+
+function coerceSettings(parsed: Partial<Settings> & { queue?: unknown }): Settings {
   return {
     set: parsed.set === "pll" ? "pll" : "oll",
     view: parsed.view === "3d" ? "3d" : "2d",
+    queue: coerceQueue(parsed.queue),
   };
 }
 
@@ -35,6 +61,7 @@ function loadSettings(): Settings {
   try {
     const raw =
       localStorage.getItem(SETTINGS_KEY) ??
+      localStorage.getItem(LEGACY_V4) ??
       localStorage.getItem(LEGACY_V3) ??
       localStorage.getItem(LEGACY_V2);
     if (!raw) return { ...DEFAULTS };
@@ -49,6 +76,9 @@ function saveSettings(): void {
 }
 
 const settings = loadSettings();
+let surface: Surface = "train";
+let browseSet: SetId = settings.set;
+let peekId: string | null = null;
 let current: Deal | null = null;
 let algOpen = false;
 let checkOpen = false;
@@ -61,6 +91,7 @@ let namePromptToken = 0;
 
 const appEl = document.querySelector("#app") as HTMLElement;
 const stageEl = document.querySelector("#stage") as HTMLElement;
+const placesEl = document.querySelector("#places") as HTMLElement;
 const setsEl = document.querySelector("#sets") as HTMLElement;
 const viewTabsEl = document.querySelector("#view-tabs") as HTMLElement;
 const nameEl = document.querySelector("#case-name") as HTMLElement;
@@ -84,16 +115,25 @@ const accountDialogInput = document.querySelector(
 ) as HTMLInputElement;
 const btnSaveAccount = document.querySelector("#btn-save-account") as HTMLButtonElement;
 const accountPage = document.querySelector("#account-page") as HTMLElement;
+const casesPage = document.querySelector("#cases-page") as HTMLElement;
 const accountBack = document.querySelector("#account-back") as HTMLButtonElement;
 const accountName = document.querySelector("#account-name") as HTMLInputElement;
 const btnDeleteAccount = document.querySelector("#btn-delete-account") as HTMLButtonElement;
 const deleteDialog = document.querySelector("#delete-dialog") as HTMLDialogElement;
 const deleteTitle = document.querySelector("#delete-title") as HTMLElement;
 const deleteCopy = document.querySelector("#delete-copy") as HTMLElement;
-const btnChange = document.querySelector("#btn-change") as HTMLButtonElement;
-const changeDialog = document.querySelector("#change-dialog") as HTMLDialogElement;
-const changeSearch = document.querySelector("#change-search") as HTMLInputElement;
-const changeList = document.querySelector("#change-list") as HTMLElement;
+const btnLookup = document.querySelector("#btn-lookup") as HTMLButtonElement;
+const queueChip = document.querySelector("#queue-chip") as HTMLElement;
+const queueLabel = document.querySelector("#queue-label") as HTMLElement;
+const btnClearQueue = document.querySelector("#btn-clear-queue") as HTMLButtonElement;
+const btnResume = document.querySelector("#btn-resume") as HTMLButtonElement;
+const resumeName = document.querySelector("#resume-name") as HTMLElement;
+const casesSearch = document.querySelector("#cases-search") as HTMLInputElement;
+const queueList = document.querySelector("#queue-list") as HTMLElement;
+const casesList = document.querySelector("#cases-list") as HTMLElement;
+const dockEl = document.querySelector("#dock") as HTMLElement;
+const dockTrain = document.querySelector("#dock-train") as HTMLButtonElement;
+const dockCases = document.querySelector("#dock-cases") as HTMLButtonElement;
 
 let player: TwistyPlayer | null = null;
 
@@ -176,22 +216,70 @@ function closeMenu(): void {
   btnMenu.setAttribute("aria-expanded", "false");
 }
 
+function activeQueue(): DrillQueue | null {
+  const queue = settings.queue;
+  if (!queue || queue.set !== settings.set) return null;
+  return queue;
+}
+
+function poolIds(): string[] | undefined {
+  return activeQueue()?.ids;
+}
+
+function paintQueueChip(): void {
+  const queue = activeQueue();
+  appEl.dataset.queue = queue ? "on" : "off";
+  if (!queue) {
+    queueChip.hidden = true;
+    queueLabel.textContent = "";
+    return;
+  }
+  queueChip.hidden = false;
+  queueLabel.textContent = `Drilling ${queue.label} · ${queue.ids.length}`;
+}
+
+function setQueue(queue: DrillQueue | null): void {
+  settings.queue = queue;
+  saveSettings();
+  paintQueueChip();
+}
+
+function showSurface(next: Surface): void {
+  commitName();
+  closeMenu();
+  surface = next;
+  appEl.dataset.surface = next;
+  stageEl.hidden = next !== "train";
+  casesPage.hidden = next !== "cases";
+  accountPage.hidden = next !== "account";
+  dockEl.hidden = next === "account";
+  renderChrome();
+  if (next === "cases") {
+    paintResume();
+    paintQueues();
+    paintCasesList();
+  }
+}
+
+function openCasesFromTrain(): void {
+  browseSet = settings.set;
+  casesSearch.value = "";
+  peekId = null;
+  showSurface("cases");
+}
+
 function openAccountPage(): void {
   commitName();
   const account = currentAccount();
   accountName.value = account.label;
-  appEl.dataset.surface = "account";
-  stageEl.hidden = true;
-  accountPage.hidden = false;
+  showSurface("account");
   accountName.focus();
   accountName.select();
 }
 
 function closeAccountPage(save = true): void {
-  if (save && !accountPage.hidden) commitAccountLabel();
-  delete appEl.dataset.surface;
-  accountPage.hidden = true;
-  stageEl.hidden = false;
+  if (save && surface === "account") commitAccountLabel();
+  showSurface("train");
 }
 
 function commitAccountLabel(): void {
@@ -214,13 +302,14 @@ function promptDeleteAccount(): void {
 
 function confirmDeleteAccount(): void {
   deleteAccount(currentAccount().id);
-  closeAccountPage(false);
   resetChain();
+  setQueue(null);
+  showSurface("train");
   dealFresh();
 }
 
 function dialogOpen(): boolean {
-  return nameDialog.open || accountDialog.open || deleteDialog.open || changeDialog.open;
+  return nameDialog.open || accountDialog.open || deleteDialog.open;
 }
 
 function renderAccounts(): void {
@@ -245,27 +334,74 @@ function renderAccounts(): void {
       }
       switchAccount(account.id);
       resetChain();
-      closeAccountPage(false);
+      setQueue(null);
+      showSurface("train");
       dealFresh();
     });
     accountList.append(button);
   }
 }
 
+function paintPlaces(): void {
+  tab(
+    placesEl,
+    [
+      { id: "train", label: "Train" },
+      { id: "cases", label: "Cases" },
+    ],
+    surface === "account" ? "train" : surface,
+    (id) => {
+      if (id === "cases") {
+        if (surface !== "cases") {
+          browseSet = settings.set;
+          peekId = null;
+        }
+        showSurface("cases");
+        return;
+      }
+      showSurface("train");
+    },
+  );
+}
+
+function paintDock(): void {
+  const here = surface === "cases" ? "cases" : "train";
+  dockTrain.classList.toggle("active", here === "train");
+  dockCases.classList.toggle("active", here === "cases");
+  if (here === "train") dockTrain.setAttribute("aria-current", "page");
+  else dockTrain.removeAttribute("aria-current");
+  if (here === "cases") dockCases.setAttribute("aria-current", "page");
+  else dockCases.removeAttribute("aria-current");
+}
+
 function renderChrome(): void {
+  const setActive = surface === "cases" ? browseSet : settings.set;
   tab(
     setsEl,
     [
       { id: "oll", label: "OLL" },
       { id: "pll", label: "PLL" },
     ],
-    settings.set,
+    setActive,
     (id) => {
-      if (id === settings.set) return;
-      settings.set = id as SetId;
+      const next = id as SetId;
+      if (surface === "cases") {
+        if (next === browseSet) return;
+        browseSet = next;
+        peekId = null;
+        casesSearch.value = "";
+        renderChrome();
+        paintQueues();
+        paintCasesList();
+        return;
+      }
+      if (next === settings.set) return;
+      settings.set = next;
+      if (settings.queue?.set !== next) settings.queue = null;
       saveSettings();
       resetChain();
       renderChrome();
+      paintQueueChip();
       dealFresh();
     },
   );
@@ -283,6 +419,9 @@ function renderChrome(): void {
       applyView();
     },
   );
+  paintPlaces();
+  paintDock();
+  paintQueueChip();
 }
 
 function applyView(): void {
@@ -398,6 +537,8 @@ function showDeal(d: Deal): void {
   paintName();
   paintAlg();
   paintCheck();
+  paintQueueChip();
+  paintResume();
   showView();
   void llMarkup(d.setupAlg, d.set).then((svg) => {
     if (current?.caseId !== d.caseId) return;
@@ -427,8 +568,17 @@ function playSolve(): void {
   applyAlgToPlayer(current, true);
 }
 
+function pickEntry(avoidId?: string) {
+  return chooseCase({
+    set: settings.set,
+    recent,
+    avoidId,
+    ids: poolIds(),
+  });
+}
+
 function dealFresh(): void {
-  const entry = chooseCase({ set: settings.set, recent: [] });
+  const entry = pickEntry();
   showDeal(dealCase(settings.set, entry));
 }
 
@@ -437,13 +587,24 @@ function advance(): void {
     chain = joinAlgs(chain, current.solveAlg);
     recent.push(current.caseId);
   }
-  const entry = chooseCase({
-    set: settings.set,
-    recent,
-    avoidId: current?.caseId,
-  });
+  const entry = pickEntry(current?.caseId);
   const found = findCase(settings.set, entry.id) ?? entry;
   showDeal(dealCase(settings.set, found));
+}
+
+function startDrill(set: SetId, ids: string[], label: string): void {
+  settings.set = set;
+  browseSet = set;
+  setQueue(ids.length === casesFor(set).length ? null : { set, label, ids });
+  resetChain();
+  peekId = null;
+  renderChrome();
+  showSurface("train");
+  dealFresh();
+}
+
+function clearQueue(): void {
+  setQueue(null);
 }
 
 const thumbCache = new Map<string, string>();
@@ -483,7 +644,7 @@ function fillThumb(el: HTMLElement): void {
     }
     const svg = await llMarkup(setup, set, true);
     thumbCache.set(key, svg);
-    if (el.dataset.id === id) el.innerHTML = svg;
+    if (el.dataset.id === id) el.innerHTML = thumbCache.get(key) ?? "";
   });
 }
 
@@ -496,24 +657,56 @@ const thumbObserver = new IntersectionObserver(
       fillThumb(el);
     }
   },
-  { root: changeList, rootMargin: "160px", threshold: 0.01 },
+  { root: casesPage, rootMargin: "160px", threshold: 0.01 },
 );
 
-function pickCase(id: string): void {
-  const entry = findCase(settings.set, id);
-  if (!entry) return;
-  changeDialog.close("pick");
-  resetChain();
-  showDeal(dealCase(settings.set, entry));
+function paintResume(): void {
+  if (!current) {
+    btnResume.hidden = true;
+    resumeName.textContent = "";
+    return;
+  }
+  const custom = caseName(current.set, current.caseId);
+  btnResume.hidden = false;
+  resumeName.textContent = named(custom) ? custom : current.canonicalName;
 }
 
-function paintChangeList(): void {
-  const q = changeSearch.value.trim().toLowerCase();
+function paintQueues(): void {
+  queueList.innerHTML = "";
+  const all = casesFor(browseSet);
+  const rows = [
+    { group: browseSet === "oll" ? "All OLL" : "All PLL", ids: all.map((entry) => entry.id) },
+    ...groupsFor(browseSet),
+  ];
+  for (const row of rows) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "queue-row";
+    const copy = document.createElement("span");
+    copy.className = "queue-copy";
+    const title = document.createElement("span");
+    title.className = "queue-name";
+    title.textContent = row.group;
+    const meta = document.createElement("span");
+    meta.className = "queue-meta";
+    meta.textContent = `${row.ids.length} case${row.ids.length === 1 ? "" : "s"}`;
+    copy.append(title, meta);
+    const drill = document.createElement("span");
+    drill.className = "pill primary";
+    drill.textContent = "Drill";
+    button.append(copy, drill);
+    button.addEventListener("click", () => startDrill(browseSet, row.ids, row.group));
+    queueList.append(button);
+  }
+}
+
+function paintCasesList(): void {
+  const q = casesSearch.value.trim().toLowerCase();
   thumbObserver.disconnect();
-  changeList.innerHTML = "";
+  casesList.innerHTML = "";
   let lastGroup = "";
-  for (const entry of casesGrouped(settings.set)) {
-    const custom = caseName(settings.set, entry.id);
+  for (const entry of casesGrouped(browseSet)) {
+    const custom = caseName(browseSet, entry.id);
     const hay = `${custom} ${entry.name} ${entry.id} ${entry.group}`.toLowerCase();
     if (q && !hay.includes(q)) continue;
     if (entry.group !== lastGroup) {
@@ -521,16 +714,19 @@ function paintChangeList(): void {
       const head = document.createElement("p");
       head.className = "change-group";
       head.textContent = entry.group;
-      changeList.append(head);
+      casesList.append(head);
     }
-    const button = document.createElement("button");
-    button.type = "button";
-    button.className = "change-case";
-    button.setAttribute("role", "option");
-    if (current?.caseId === entry.id) button.setAttribute("aria-current", "true");
+    const card = document.createElement("div");
+    card.className = "change-case";
+    card.setAttribute("role", "listitem");
+    const open = peekId === entry.id;
+    card.setAttribute("aria-expanded", open ? "true" : "false");
+    const main = document.createElement("button");
+    main.type = "button";
+    main.className = "change-case-main";
     const thumb = document.createElement("span");
     thumb.className = "change-thumb";
-    thumb.dataset.set = settings.set;
+    thumb.dataset.set = browseSet;
     thumb.dataset.id = entry.id;
     thumb.dataset.setup = invertMoves(entry.algs[0].moves);
     const copy = document.createElement("span");
@@ -544,28 +740,45 @@ function paintChangeList(): void {
       meta.className = "change-case-meta";
       meta.textContent = entry.name;
       copy.append(meta);
+    } else {
+      const meta = document.createElement("span");
+      meta.className = "change-case-meta";
+      meta.textContent = open ? "Hide alg" : "Show alg";
+      copy.append(meta);
     }
-    button.append(thumb, copy);
-    button.addEventListener("click", () => pickCase(entry.id));
-    changeList.append(button);
-    thumbObserver.observe(thumb);
+    main.append(thumb, copy);
+    main.addEventListener("click", () => {
+      peekId = peekId === entry.id ? null : entry.id;
+      paintCasesList();
+    });
+    card.append(main);
+    if (open) {
+      const peek = document.createElement("div");
+      peek.className = "cases-peek";
+      const alg = document.createElement("p");
+      alg.className = "cases-alg";
+      alg.textContent = entry.algs[0].moves;
+      const drill = document.createElement("button");
+      drill.type = "button";
+      drill.className = "pill";
+      drill.textContent = "Drill this";
+      drill.addEventListener("click", () => {
+        startDrill(browseSet, [entry.id], custom || entry.name);
+      });
+      peek.append(alg, drill);
+      card.append(peek);
+      fillThumb(thumb);
+    } else {
+      thumbObserver.observe(thumb);
+    }
+    casesList.append(card);
   }
-  if (!changeList.querySelector(".change-case")) {
+  if (!casesList.querySelector(".change-case")) {
     const empty = document.createElement("p");
     empty.className = "change-case-meta";
     empty.textContent = "No cases match.";
-    changeList.append(empty);
+    casesList.append(empty);
   }
-}
-
-function openChange(): void {
-  commitName();
-  changeSearch.value = "";
-  changeDialog.showModal();
-  requestAnimationFrame(() => {
-    paintChangeList();
-    changeSearch.focus();
-  });
 }
 
 function requestNext(): void {
@@ -583,6 +796,8 @@ function requestNext(): void {
 
 function renderAll(): void {
   renderChrome();
+  paintQueueChip();
+  showSurface("train");
   if (current && current.set === settings.set) {
     const entry = findCase(settings.set, current.caseId);
     if (entry) {
@@ -607,9 +822,18 @@ nameEdit.addEventListener("keydown", (ev) => {
 nameEdit.addEventListener("blur", () => stopNameEdit(true));
 
 document.querySelector("#btn-next")!.addEventListener("click", () => requestNext());
-btnChange.addEventListener("click", () => openChange());
-changeSearch.addEventListener("input", () => paintChangeList());
-changeDialog.querySelector("form")!.addEventListener("submit", (ev) => ev.preventDefault());
+btnLookup.addEventListener("click", () => openCasesFromTrain());
+btnClearQueue.addEventListener("click", () => clearQueue());
+btnResume.addEventListener("click", () => showSurface("train"));
+casesSearch.addEventListener("input", () => paintCasesList());
+dockTrain.addEventListener("click", () => showSurface("train"));
+dockCases.addEventListener("click", () => {
+  if (surface !== "cases") {
+    browseSet = settings.set;
+    peekId = null;
+  }
+  showSurface("cases");
+});
 algCard.addEventListener("click", () => {
   commitName();
   if (!algOpen) revealAlg();
@@ -652,7 +876,8 @@ accountDialog.addEventListener("close", () => {
   if (accountDialog.returnValue !== "save" || !named(accountDialogInput.value)) return;
   createAccount(accountDialogInput.value);
   resetChain();
-  closeAccountPage(false);
+  setQueue(null);
+  showSurface("train");
   dealFresh();
 });
 
@@ -700,20 +925,31 @@ window.addEventListener("keydown", (ev) => {
   if (ev.code === "Escape") {
     closeMenu();
     stopNameEdit(false);
-    if (!dialogOpen() && !accountPage.hidden) closeAccountPage();
+    if (dialogOpen()) return;
+    if (surface === "account") {
+      closeAccountPage();
+      return;
+    }
+    if (surface === "cases") {
+      showSurface("train");
+      return;
+    }
   }
-  if (dialogOpen() || !accountPage.hidden) return;
+  if (dialogOpen() || surface !== "train") return;
   if (ev.code === "Space") {
     ev.preventDefault();
     requestNext();
   } else if (ev.key === "r" || ev.key === "R") {
     if (!algOpen) revealAlg();
+  } else if (ev.key === "l" || ev.key === "L") {
+    openCasesFromTrain();
   }
 });
 
 void renderAll();
 void hydrateVault().then(() => {
   if (current) paintName();
+  if (surface === "cases") paintCasesList();
 });
 
 if (import.meta.env.PROD && "serviceWorker" in navigator) {

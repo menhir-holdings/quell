@@ -13,12 +13,15 @@ export type ChooseInput = {
   set: SetId;
   recent: string[];
   avoidId?: string;
+  /** When set, Next stays inside this subset. */
+  ids?: string[];
   policy?: SchedulePolicy;
 };
 
 const RECENT_CAP = 8;
 
 function variety(pool: CaseDef[], recent: string[], avoidId?: string): CaseDef {
+  if (pool.length <= 1) return pool[0];
   const blocked = new Set(recent.slice(-RECENT_CAP));
   if (avoidId) blocked.add(avoidId);
   let candidates = pool.filter((entry) => !blocked.has(entry.id));
@@ -29,12 +32,20 @@ function variety(pool: CaseDef[], recent: string[], avoidId?: string): CaseDef {
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
+function poolFor(input: ChooseInput): CaseDef[] {
+  const all = casesFor(input.set);
+  if (!input.ids?.length) return all;
+  const allowed = new Set(input.ids);
+  const subset = all.filter((entry) => allowed.has(entry.id));
+  return subset.length ? subset : all;
+}
+
 /** Hook for later policies. `records` is already the current account's set. */
 export function chooseCase(
   input: ChooseInput,
   _records: Record<string, CaseRecord> = recordsFor(input.set),
 ): CaseDef {
-  const pool = casesFor(input.set);
+  const pool = poolFor(input);
   const policy = input.policy ?? "variety";
   if (policy === "variety") return variety(pool, input.recent, input.avoidId);
   return variety(pool, input.recent, input.avoidId);
