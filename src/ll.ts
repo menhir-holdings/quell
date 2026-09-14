@@ -265,12 +265,9 @@ export function llSvg(ll: LlStickers, set: SetId, mini = false, markerId = "ah")
 }
 
 export function tabIconSvg(ll: LlStickers, set: SetId): string {
-  const cell = 5.2;
-  const gap = 0.2;
-  const origin = 8;
-  const bar = 2.05;
-  const lift = 0.5;
-  const inset = 0.5;
+  const cell = 10;
+  const gap = 0.5;
+  const origin = 0.5;
   const paint: Record<Hue, string> = {
     Y: "#ffd21a",
     W: "#F7F7F4",
@@ -288,25 +285,10 @@ export function tabIconSvg(ll: LlStickers, set: SetId): string {
     const col = i % 3;
     const row = Math.floor(i / 3);
     tiles.push(
-      `<rect x="${x0(col).toFixed(1)}" y="${y0(row).toFixed(1)}" width="${cell}" height="${cell}" rx="0.7" fill="${tone(ll.u[i])}"/>`,
+      `<rect x="${x0(col).toFixed(1)}" y="${y0(row).toFixed(1)}" width="${cell}" height="${cell}" rx="1" fill="${tone(ll.u[i])}"/>`,
     );
   }
-  const bars: string[] = [];
-  for (let i = 0; i < 3; i++) {
-    bars.push(
-      `<rect x="${(x0(i) + inset).toFixed(2)}" y="${(y0(2) + cell + lift).toFixed(2)}" width="${cell - inset * 2}" height="${bar}" rx="0.4" fill="${tone(ll.f[i])}"/>`,
-    );
-    bars.push(
-      `<rect x="${(x0(2) + cell + lift).toFixed(2)}" y="${(y0(i) + inset).toFixed(2)}" width="${bar}" height="${cell - inset * 2}" rx="0.4" fill="${tone(ll.r[i])}"/>`,
-    );
-    bars.push(
-      `<rect x="${(x0(i) + inset).toFixed(2)}" y="${(origin - lift - bar).toFixed(2)}" width="${cell - inset * 2}" height="${bar}" rx="0.4" fill="${tone(ll.b[i])}"/>`,
-    );
-    bars.push(
-      `<rect x="${(origin - lift - bar).toFixed(2)}" y="${(y0(i) + inset).toFixed(2)}" width="${bar}" height="${cell - inset * 2}" rx="0.4" fill="${tone(ll.l[i])}"/>`,
-    );
-  }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#f3f4f8"/>${tiles.join("")}${bars.join("")}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="#d8dbe3"/>${tiles.join("")}</svg>`;
 }
 
 export async function llMarkup(setupAlg: string, set: SetId, mini = false): Promise<string> {
