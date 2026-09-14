@@ -21,7 +21,7 @@ import {
   invertMoves,
   joinAlgs,
 } from "./deal";
-import { llMarkup } from "./ll";
+import { lastLayer, llMarkup, tabIconSvg } from "./ll";
 import { chooseCase } from "./schedule";
 import type { CubeView, Deal, DrillQueue, SetId, Settings } from "./types";
 import "./style.css";
@@ -564,6 +564,16 @@ function paintCheck(): void {
   });
 }
 
+function setTabIcon(svg: string): void {
+  const href = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svg)}`;
+  document.querySelectorAll('link[rel="icon"]').forEach((node) => node.remove());
+  const link = document.createElement("link");
+  link.rel = "icon";
+  link.type = "image/svg+xml";
+  link.href = href;
+  document.head.appendChild(link);
+}
+
 function showDeal(d: Deal): void {
   stopNameEdit(false);
   if (nameDialog.open) {
@@ -583,6 +593,10 @@ function showDeal(d: Deal): void {
   void llMarkup(d.setupAlg, d.set).then((svg) => {
     if (current?.caseId !== d.caseId) return;
     llDiagram.innerHTML = svg;
+  });
+  void lastLayer(d.setupAlg).then((ll) => {
+    if (current?.caseId !== d.caseId) return;
+    setTabIcon(tabIconSvg(ll, d.set));
   });
   if (settings.view === "3d") {
     remountPlayer();

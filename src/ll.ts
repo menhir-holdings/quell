@@ -264,6 +264,34 @@ export function llSvg(ll: LlStickers, set: SetId, mini = false, markerId = "ah")
   return `<svg class="ll-svg" viewBox="0 0 100 100" aria-hidden="true">${tiles.join("")}${bars.join("")}${arrows}</svg>`;
 }
 
+export function tabIconSvg(ll: LlStickers, set: SetId): string {
+  const cell = 7.2;
+  const gap = 0.8;
+  const origin = 4.2;
+  const paint: Record<Hue, string> = {
+    Y: "#FFD21A",
+    W: "#F7F7F4",
+    G: "#22C55E",
+    B: "#3B82F6",
+    R: "#EF4444",
+    O: "#FF7A18",
+  };
+  const plastic = "#E6E8EE";
+  const tiles: string[] = [];
+  for (let i = 0; i < 9; i++) {
+    const col = i % 3;
+    const row = Math.floor(i / 3);
+    const hue = ll.u[i];
+    const color = set === "oll" ? (hue === "Y" ? paint.Y : plastic) : paint[hue];
+    const x = origin + col * (cell + gap);
+    const y = origin + row * (cell + gap);
+    tiles.push(
+      `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${cell}" height="${cell}" rx="0.9" fill="${color}"/>`,
+    );
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#f3f4f8"/>${tiles.join("")}</svg>`;
+}
+
 export async function llMarkup(setupAlg: string, set: SetId, mini = false): Promise<string> {
   return llSvg(await lastLayer(setupAlg), set, mini, `ah-${++svgSeq}`);
 }
