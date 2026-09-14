@@ -24,7 +24,7 @@
     />
   </head>
   <body>
-    <div id="app" data-surface="train">
+    <div id="app" data-surface="learn" data-lookup="off">
       <header class="hero">
         <h1>Quell</h1>
         <nav id="places" class="places" aria-label="Place"></nav>
@@ -92,27 +92,20 @@
         </p>
 
         <div class="actions">
-          <button type="button" id="btn-lookup" class="pill">Look up</button>
+          <button type="button" id="btn-lookup" class="pill" aria-haspopup="dialog">
+            Look up
+          </button>
           <button type="button" id="btn-next" class="pill primary">Next</button>
         </div>
       </section>
 
-      <section class="cases-page" id="cases-page" hidden>
+      <section class="practice-page" id="practice-page" hidden>
         <button type="button" id="btn-resume" class="resume-bar" hidden>
-          <span class="resume-kicker">Back to train</span>
+          <span class="resume-kicker">Back to Learn</span>
           <span id="resume-name" class="resume-name"></span>
         </button>
-        <input
-          id="cases-search"
-          type="search"
-          placeholder="Name, number, or group"
-          autocomplete="off"
-          spellcheck="false"
-        />
-        <p class="change-group">Start a subset</p>
+        <p class="practice-lead">One tap starts that subset on the same flashcard.</p>
         <div id="queue-list" class="queue-list"></div>
-        <p class="change-group">Look up a case</p>
-        <div id="cases-list" class="cases-list" role="list"></div>
       </section>
 
       <section class="account-page" id="account-page" hidden>
@@ -134,14 +127,41 @@
       </section>
 
       <nav id="dock" class="dock" aria-label="Place">
-        <button type="button" id="dock-train" class="dock-tab" data-place="train">
-          Train
+        <button type="button" id="dock-learn" class="dock-tab" data-place="learn">
+          Learn
         </button>
-        <button type="button" id="dock-cases" class="dock-tab" data-place="cases">
-          Cases
+        <button type="button" id="dock-practice" class="dock-tab" data-place="practice">
+          Practice
         </button>
       </nav>
     </div>
+
+    <dialog id="lookup-sheet" class="lookup-sheet" aria-labelledby="lookup-title">
+      <div class="lookup-frame">
+        <header class="lookup-head">
+          <h2 id="lookup-title">Look up</h2>
+          <nav id="lookup-sets" class="mode-tabs" aria-label="Lookup set"></nav>
+        </header>
+        <input
+          id="lookup-search"
+          type="search"
+          placeholder="Name, number, or group"
+          autocomplete="off"
+          spellcheck="false"
+        />
+        <div id="lookup-list" class="lookup-list"></div>
+        <div class="lookup-foot">
+          <div id="lookup-peek" class="lookup-peek" hidden>
+            <span id="lookup-peek-thumb" class="lookup-peek-thumb"></span>
+            <div class="lookup-peek-copy">
+              <p id="lookup-peek-name" class="lookup-peek-name"></p>
+              <p id="lookup-peek-alg" class="lookup-peek-alg"></p>
+            </div>
+          </div>
+          <button type="button" id="btn-lookup-done" class="pill primary">Done</button>
+        </div>
+      </div>
+    </dialog>
 
     <dialog id="name-dialog" class="confirm-dialog">
       <form method="dialog" class="confirm-form" id="name-form">

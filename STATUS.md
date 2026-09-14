@@ -24,7 +24,7 @@
 
 ## In review
 
-- [MT-227](https://linear.app/menhir-holdings/issue/MT-227) — Train / Cases IA: lookup without losing place, one-tap subset drills, stickerless tab mark
+- [MT-227](https://linear.app/menhir-holdings/issue/MT-227) — Look up is a session overlay; Practice is a one-tap subset hub (not a mixed Cases sheet)
 
 ## Closed
 
