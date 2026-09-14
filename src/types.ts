@@ -52,7 +52,15 @@ export type Vault = {
   accounts: Account[];
 };
 
+/** Restricted drill pool. Empty / missing means the full set. */
+export type DrillQueue = {
+  set: SetId;
+  label: string;
+  ids: string[];
+};
+
 export type Settings = {
   set: SetId;
   view: CubeView;
+  queue: DrillQueue | null;
 };
