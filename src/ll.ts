@@ -265,31 +265,48 @@ export function llSvg(ll: LlStickers, set: SetId, mini = false, markerId = "ah")
 }
 
 export function tabIconSvg(ll: LlStickers, set: SetId): string {
-  const cell = 7.2;
-  const gap = 0.8;
-  const origin = 4.2;
+  const cell = 5.2;
+  const gap = 0.2;
+  const origin = 8;
+  const bar = 2.05;
+  const lift = 0.5;
+  const inset = 0.5;
   const paint: Record<Hue, string> = {
-    Y: "#FFD21A",
+    Y: "#ffd21a",
     W: "#F7F7F4",
     G: "#22C55E",
     B: "#3B82F6",
     R: "#EF4444",
     O: "#FF7A18",
   };
-  const plastic = "#E6E8EE";
+  const plastic = "#e6e8ee";
+  const tone = (hue: Hue) => (set === "oll" ? (hue === "Y" ? paint.Y : plastic) : paint[hue]);
+  const x0 = (c: number) => origin + c * (cell + gap);
+  const y0 = (r: number) => origin + r * (cell + gap);
   const tiles: string[] = [];
   for (let i = 0; i < 9; i++) {
     const col = i % 3;
     const row = Math.floor(i / 3);
-    const hue = ll.u[i];
-    const color = set === "oll" ? (hue === "Y" ? paint.Y : plastic) : paint[hue];
-    const x = origin + col * (cell + gap);
-    const y = origin + row * (cell + gap);
     tiles.push(
-      `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${cell}" height="${cell}" rx="0.9" fill="${color}"/>`,
+      `<rect x="${x0(col).toFixed(1)}" y="${y0(row).toFixed(1)}" width="${cell}" height="${cell}" rx="0.7" fill="${tone(ll.u[i])}"/>`,
     );
   }
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#f3f4f8"/>${tiles.join("")}</svg>`;
+  const bars: string[] = [];
+  for (let i = 0; i < 3; i++) {
+    bars.push(
+      `<rect x="${(x0(i) + inset).toFixed(2)}" y="${(y0(2) + cell + lift).toFixed(2)}" width="${cell - inset * 2}" height="${bar}" rx="0.4" fill="${tone(ll.f[i])}"/>`,
+    );
+    bars.push(
+      `<rect x="${(x0(2) + cell + lift).toFixed(2)}" y="${(y0(i) + inset).toFixed(2)}" width="${bar}" height="${cell - inset * 2}" rx="0.4" fill="${tone(ll.r[i])}"/>`,
+    );
+    bars.push(
+      `<rect x="${(x0(i) + inset).toFixed(2)}" y="${(origin - lift - bar).toFixed(2)}" width="${cell - inset * 2}" height="${bar}" rx="0.4" fill="${tone(ll.b[i])}"/>`,
+    );
+    bars.push(
+      `<rect x="${(origin - lift - bar).toFixed(2)}" y="${(y0(i) + inset).toFixed(2)}" width="${bar}" height="${cell - inset * 2}" rx="0.4" fill="${tone(ll.l[i])}"/>`,
+    );
+  }
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#f3f4f8"/>${tiles.join("")}${bars.join("")}</svg>`;
 }
 
 export async function llMarkup(setupAlg: string, set: SetId, mini = false): Promise<string> {
