@@ -1,13 +1,25 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Default 2D OLL plus, stickerless: gaps, no black plastic. -->
+  <!-- OLL 20 (X / Dot): corners + center yellow, edges unoriented. Side ticks are the U-layer stickers. -->
   <rect width="32" height="32" rx="6" fill="#f3f4f8"/>
-  <rect x="4.2" y="4.2" width="7.2" height="7.2" rx="0.9" fill="#e6e8ee"/>
-  <rect x="12.4" y="4.2" width="7.2" height="7.2" rx="0.9" fill="#ffd21a"/>
-  <rect x="20.6" y="4.2" width="7.2" height="7.2" rx="0.9" fill="#e6e8ee"/>
-  <rect x="4.2" y="12.4" width="7.2" height="7.2" rx="0.9" fill="#ffd21a"/>
-  <rect x="12.4" y="12.4" width="7.2" height="7.2" rx="0.9" fill="#ffd21a"/>
-  <rect x="20.6" y="12.4" width="7.2" height="7.2" rx="0.9" fill="#ffd21a"/>
-  <rect x="4.2" y="20.6" width="7.2" height="7.2" rx="0.9" fill="#e6e8ee"/>
-  <rect x="12.4" y="20.6" width="7.2" height="7.2" rx="0.9" fill="#ffd21a"/>
-  <rect x="20.6" y="20.6" width="7.2" height="7.2" rx="0.9" fill="#e6e8ee"/>
+  <rect x="8.0" y="8.0" width="5.2" height="5.2" rx="0.7" fill="#ffd21a"/>
+  <rect x="13.4" y="8.0" width="5.2" height="5.2" rx="0.7" fill="#e6e8ee"/>
+  <rect x="18.8" y="8.0" width="5.2" height="5.2" rx="0.7" fill="#ffd21a"/>
+  <rect x="8.0" y="13.4" width="5.2" height="5.2" rx="0.7" fill="#e6e8ee"/>
+  <rect x="13.4" y="13.4" width="5.2" height="5.2" rx="0.7" fill="#ffd21a"/>
+  <rect x="18.8" y="13.4" width="5.2" height="5.2" rx="0.7" fill="#e6e8ee"/>
+  <rect x="8.0" y="18.8" width="5.2" height="5.2" rx="0.7" fill="#ffd21a"/>
+  <rect x="13.4" y="18.8" width="5.2" height="5.2" rx="0.7" fill="#e6e8ee"/>
+  <rect x="18.8" y="18.8" width="5.2" height="5.2" rx="0.7" fill="#ffd21a"/>
+  <rect x="8.5" y="24.5" width="4.2" height="2.05" rx="0.4" fill="#e6e8ee"/>
+  <rect x="13.9" y="24.5" width="4.2" height="2.05" rx="0.4" fill="#ffd21a"/>
+  <rect x="19.3" y="24.5" width="4.2" height="2.05" rx="0.4" fill="#e6e8ee"/>
+  <rect x="8.5" y="5.45" width="4.2" height="2.05" rx="0.4" fill="#e6e8ee"/>
+  <rect x="13.9" y="5.45" width="4.2" height="2.05" rx="0.4" fill="#ffd21a"/>
+  <rect x="19.3" y="5.45" width="4.2" height="2.05" rx="0.4" fill="#e6e8ee"/>
+  <rect x="5.45" y="8.5" width="2.05" height="4.2" rx="0.4" fill="#e6e8ee"/>
+  <rect x="5.45" y="13.9" width="2.05" height="4.2" rx="0.4" fill="#ffd21a"/>
+  <rect x="5.45" y="19.3" width="2.05" height="4.2" rx="0.4" fill="#e6e8ee"/>
+  <rect x="24.5" y="8.5" width="2.05" height="4.2" rx="0.4" fill="#e6e8ee"/>
+  <rect x="24.5" y="13.9" width="2.05" height="4.2" rx="0.4" fill="#ffd21a"/>
+  <rect x="24.5" y="19.3" width="2.05" height="4.2" rx="0.4" fill="#e6e8ee"/>
 </svg>
