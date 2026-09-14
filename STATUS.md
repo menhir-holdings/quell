@@ -31,4 +31,6 @@
 
 ## Next
 
+- [MT-228](https://linear.app/menhir-holdings/issue/MT-228) — stickerless tab favicon (black strokes off the cube mark)
+
 See [TODO.md](./TODO.md).

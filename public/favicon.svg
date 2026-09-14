@@ -1,13 +1,9 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <rect width="100" height="100" fill="#f2f3f7"/>
-  <rect x="14" y="14" width="72" height="72" rx="14" fill="#F5D000" stroke="#1A1A1A" stroke-width="4"/>
-  <rect x="24" y="24" width="16" height="16" fill="#C5C5C5" stroke="#1A1A1A" stroke-width="1.5"/>
-  <rect x="42" y="24" width="16" height="16" fill="#F5D000" stroke="#1A1A1A" stroke-width="1.5"/>
-  <rect x="60" y="24" width="16" height="16" fill="#C5C5C5" stroke="#1A1A1A" stroke-width="1.5"/>
-  <rect x="24" y="42" width="16" height="16" fill="#F5D000" stroke="#1A1A1A" stroke-width="1.5"/>
-  <rect x="42" y="42" width="16" height="16" fill="#F5D000" stroke="#1A1A1A" stroke-width="1.5"/>
-  <rect x="60" y="42" width="16" height="16" fill="#F5D000" stroke="#1A1A1A" stroke-width="1.5"/>
-  <rect x="24" y="60" width="16" height="16" fill="#C5C5C5" stroke="#1A1A1A" stroke-width="1.5"/>
-  <rect x="42" y="60" width="16" height="16" fill="#F5D000" stroke="#1A1A1A" stroke-width="1.5"/>
-  <rect x="60" y="60" width="16" height="16" fill="#C5C5C5" stroke="#1A1A1A" stroke-width="1.5"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <rect width="32" height="32" rx="6" fill="#F6F4EE"/>
+  <path fill="#F6F4EE" d="M7 12.2 16 7l9 5.2-9 5.2z"/>
+  <path fill="#1FBF4A" d="M7 12.2 16 17.4V25L7 19.8z"/>
+  <path fill="#FF7A12" d="M16 17.4 25 12.2V19.8L16 25z"/>
+  <path fill="#FFD400" d="M9.4 12.6 16 8.8l6.6 3.8-6.6 3.8z"/>
+  <path fill="#22C14B" d="M9.4 12.6 16 16.4v6.4l-6.6-3.8z"/>
+  <path fill="#FF8A14" d="M16 16.4 22.6 12.6v6.4L16 22.8z"/>
 </svg>
