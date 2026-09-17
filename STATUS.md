@@ -1,12 +1,17 @@
 # Quell — Status
 
 **Version:** 0.8.0  
-**As of:** 2026-09-14  
+**As of:** 2026-09-17  
 **SoT:** [Linear — Quell](https://linear.app/menhir-holdings/project/quell-4c873f24ef7f)  
 **Checkout:** `Menhir Holdings/Game/Quell`
 
 ## Shipped
 
+- [MT-227](https://linear.app/menhir-holdings/issue/MT-227) — Look up overlay + Practice start hub; Learn / Practice / Look up OLL/PLL isolated  
+  Live: **https://quellcube.vercel.app** (`8da0e1a`)  
+  [PR #11](https://github.com/menhir-holdings/quell/pull/11)
+- [MT-228](https://linear.app/menhir-holdings/issue/MT-228) — Quell stickerless tab favicon (OLL 20, no side ticks) shipped on PR #11. Remaining hub cube / other-stone icons stay on that issue.  
+  Live: **https://quellcube.vercel.app**
 - [MT-201](https://linear.app/menhir-holdings/issue/MT-201) — unclip shadows, empty rename caret, name-prompt timing  
   Live: **https://quellcube.vercel.app**  
   [PR #9](https://github.com/menhir-holdings/quell/pull/9)
@@ -22,10 +27,6 @@
 - [MT-194](https://linear.app/menhir-holdings/issue/MT-194) — STC 2D diagrams, reveal on the alg card, Learned, restyle
 - [MT-193](https://linear.app/menhir-holdings/issue/MT-193) — OLL/PLL learn + practice trainer
 
-## In review
-
-- [MT-227](https://linear.app/menhir-holdings/issue/MT-227) — Look up is a session overlay; Practice is a one-tap subset hub (not a mixed Cases sheet)
-
 ## Closed
 
 | Issue | What |
@@ -35,6 +36,6 @@
 
 ## Next
 
-- [MT-228](https://linear.app/menhir-holdings/issue/MT-228) — stickerless tab favicon (black strokes off the cube mark) — landed on the MT-227 branch; close when that ships
+None in this checkout. Hub cube + remaining product favicons stay on [MT-228](https://linear.app/menhir-holdings/issue/MT-228).
 
 See [TODO.md](./TODO.md).

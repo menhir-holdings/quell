@@ -6,8 +6,7 @@ Ship each pass to production (`quellcube.vercel.app`). Do not leave work on a pr
 
 ## Open
 
-- [MT-227](https://linear.app/menhir-holdings/issue/MT-227) — Look up overlay + Practice start hub (In Review)
-- [MT-228](https://linear.app/menhir-holdings/issue/MT-228) — stickerless favicon (no black strokes) — included on the MT-227 branch
+None. [MT-227](https://linear.app/menhir-holdings/issue/MT-227) and the Quell favicon slice of [MT-228](https://linear.app/menhir-holdings/issue/MT-228) shipped on [PR #11](https://github.com/menhir-holdings/quell/pull/11) to **https://quellcube.vercel.app**.
 
 ## Backlog
 
