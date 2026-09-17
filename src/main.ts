@@ -78,6 +78,7 @@ function saveSettings(): void {
 const settings = loadSettings();
 let surface: Surface = "learn";
 let browseSet: SetId = settings.set;
+let lookupSet: SetId = settings.set;
 let peekId: string | null = null;
 let current: Deal | null = null;
 let algOpen = false;
@@ -323,11 +324,11 @@ function paintLookupSets(): void {
       { id: "oll", label: "OLL" },
       { id: "pll", label: "PLL" },
     ],
-    browseSet,
+    lookupSet,
     (id) => {
       const next = id as SetId;
-      if (next === browseSet) return;
-      browseSet = next;
+      if (next === lookupSet) return;
+      lookupSet = next;
       peekId = null;
       lookupSearch.value = "";
       paintLookupSets();
@@ -340,7 +341,7 @@ function paintLookupSets(): void {
 function openLookup(): void {
   commitName();
   closeMenu();
-  browseSet = settings.set;
+  lookupSet = settings.set;
   lookupSearch.value = "";
   peekId = null;
   paintLookupSets();
@@ -398,7 +399,6 @@ function paintPlaces(): void {
     surface === "account" ? "learn" : surface,
     (id) => {
       if (id === "practice") {
-        if (surface !== "practice") browseSet = settings.set;
         showSurface("practice");
         return;
       }
@@ -648,7 +648,6 @@ function advance(): void {
 
 function startDrill(set: SetId, ids: string[], label: string): void {
   settings.set = set;
-  browseSet = set;
   setQueue(ids.length === casesFor(set).length ? null : { set, label, ids });
   resetChain();
   peekId = null;
@@ -771,18 +770,18 @@ function paintLookupPeek(): void {
     lookupPeekAlg.textContent = "";
     return;
   }
-  const entry = findCase(browseSet, peekId);
+  const entry = findCase(lookupSet, peekId);
   if (!entry) {
     peekId = null;
     lookupPeek.hidden = true;
     return;
   }
-  const custom = caseName(browseSet, entry.id);
+  const custom = caseName(lookupSet, entry.id);
   lookupPeek.hidden = false;
   lookupPeekName.textContent = custom || entry.name;
   lookupPeekAlg.textContent = entry.algs[0].moves;
   lookupPeekThumb.replaceChildren();
-  lookupPeekThumb.dataset.set = browseSet;
+  lookupPeekThumb.dataset.set = lookupSet;
   lookupPeekThumb.dataset.id = entry.id;
   lookupPeekThumb.dataset.setup = invertMoves(entry.algs[0].moves);
   fillThumb(lookupPeekThumb);
@@ -811,8 +810,8 @@ function paintLookupList(): void {
   thumbObserver.disconnect();
   lookupList.innerHTML = "";
   let lastGroup = "";
-  for (const entry of casesGrouped(browseSet)) {
-    const custom = caseName(browseSet, entry.id);
+  for (const entry of casesGrouped(lookupSet)) {
+    const custom = caseName(lookupSet, entry.id);
     const hay = `${custom} ${entry.name} ${entry.id} ${entry.group}`.toLowerCase();
     if (q && !hay.includes(q)) continue;
     if (entry.group !== lastGroup) {
@@ -830,7 +829,7 @@ function paintLookupList(): void {
     card.setAttribute("aria-pressed", peekId === entry.id ? "true" : "false");
     const thumb = document.createElement("span");
     thumb.className = "lookup-thumb";
-    thumb.dataset.set = browseSet;
+    thumb.dataset.set = lookupSet;
     thumb.dataset.id = entry.id;
     thumb.dataset.setup = invertMoves(entry.algs[0].moves);
     const copy = document.createElement("span");
@@ -913,10 +912,7 @@ lookupSearch.addEventListener("keydown", (ev) => {
 btnClearQueue.addEventListener("click", () => clearQueue());
 btnResume.addEventListener("click", () => showSurface("learn"));
 dockLearn.addEventListener("click", () => showSurface("learn"));
-dockPractice.addEventListener("click", () => {
-  if (surface !== "practice") browseSet = settings.set;
-  showSurface("practice");
-});
+dockPractice.addEventListener("click", () => showSurface("practice"));
 algCard.addEventListener("click", () => {
   commitName();
   if (!algOpen) revealAlg();
