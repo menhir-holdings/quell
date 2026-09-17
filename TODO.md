@@ -6,7 +6,7 @@ Ship each pass to production (`quellcube.vercel.app`). Do not leave work on a pr
 
 ## Open
 
-None. [MT-227](https://linear.app/menhir-holdings/issue/MT-227) and the Quell favicon slice of [MT-228](https://linear.app/menhir-holdings/issue/MT-228) shipped on [PR #11](https://github.com/menhir-holdings/quell/pull/11) to **https://quellcube.vercel.app**.
+- [MT-228](https://linear.app/menhir-holdings/issue/MT-228) — Quell favicon as a yellow cubie cross (plus), corners empty. Preview PR, not prod. OLL 20 remains live until Phil picks.
 
 ## Backlog
 

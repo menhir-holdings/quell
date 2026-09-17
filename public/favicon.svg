@@ -1,12 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <rect width="32" height="32" fill="#d8dbe3"/>
-  <rect x="0.5" y="0.5" width="10" height="10" rx="1" fill="#ffd21a"/>
-  <rect x="11" y="0.5" width="10" height="10" rx="1" fill="#e6e8ee"/>
-  <rect x="21.5" y="0.5" width="10" height="10" rx="1" fill="#ffd21a"/>
-  <rect x="0.5" y="11" width="10" height="10" rx="1" fill="#e6e8ee"/>
+  <!-- Stickerless OLL cross: center + four orthogonal cubies. Corners empty. -->
+  <rect x="11" y="0.5" width="10" height="10" rx="1" fill="#ffd21a"/>
+  <rect x="0.5" y="11" width="10" height="10" rx="1" fill="#ffd21a"/>
   <rect x="11" y="11" width="10" height="10" rx="1" fill="#ffd21a"/>
-  <rect x="21.5" y="11" width="10" height="10" rx="1" fill="#e6e8ee"/>
-  <rect x="0.5" y="21.5" width="10" height="10" rx="1" fill="#ffd21a"/>
-  <rect x="11" y="21.5" width="10" height="10" rx="1" fill="#e6e8ee"/>
-  <rect x="21.5" y="21.5" width="10" height="10" rx="1" fill="#ffd21a"/>
+  <rect x="21.5" y="11" width="10" height="10" rx="1" fill="#ffd21a"/>
+  <rect x="11" y="21.5" width="10" height="10" rx="1" fill="#ffd21a"/>
 </svg>
