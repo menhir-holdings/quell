@@ -19,6 +19,20 @@ export function findCase(set: SetId, id: string): CaseDef | undefined {
   return casesFor(set).find((entry) => entry.id === id);
 }
 
+export function groupsFor(set: SetId): { group: string; ids: string[] }[] {
+  const order = set === "oll" ? OLL_GROUPS : PLL_GROUPS;
+  const map = new Map<string, string[]>();
+  for (const entry of casesFor(set)) {
+    const list = map.get(entry.group) ?? [];
+    list.push(entry.id);
+    map.set(entry.group, list);
+  }
+  return order.filter((group) => map.has(group)).map((group) => ({
+    group,
+    ids: map.get(group) ?? [],
+  }));
+}
+
 export function flatten(moves: string): string {
   return moves.replace(/[()]/g, "").replace(/\s+/g, " ").trim();
 }
