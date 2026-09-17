@@ -10,7 +10,7 @@
 - [MT-227](https://linear.app/menhir-holdings/issue/MT-227) — Look up overlay + Practice start hub; Learn / Practice / Look up OLL/PLL isolated  
   Live: **https://quellcube.vercel.app** (`8da0e1a`)  
   [PR #11](https://github.com/menhir-holdings/quell/pull/11)
-- [MT-228](https://linear.app/menhir-holdings/issue/MT-228) — Quell stickerless tab favicon (OLL 20, no side ticks) shipped on PR #11. Remaining hub cube / other-stone icons stay on that issue.  
+- [MT-228](https://linear.app/menhir-holdings/issue/MT-228) — Quell stickerless OLL 20 tab icon shipped on PR #11. Cross (plus) mark is a follow-up preview, not production. Remaining hub cube / other-stone icons stay on that issue.  
   Live: **https://quellcube.vercel.app**
 - [MT-201](https://linear.app/menhir-holdings/issue/MT-201) — unclip shadows, empty rename caret, name-prompt timing  
   Live: **https://quellcube.vercel.app**  
@@ -36,6 +36,6 @@
 
 ## Next
 
-None in this checkout. Hub cube + remaining product favicons stay on [MT-228](https://linear.app/menhir-holdings/issue/MT-228).
+- [MT-228](https://linear.app/menhir-holdings/issue/MT-228) — Quell tab mark → yellow cubie **cross** (center + four orthogonal, corners transparent). Preview only; not production.
 
 See [TODO.md](./TODO.md).
